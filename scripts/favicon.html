@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<!-- favicon の元。scripts/build-favicon.sh が ?size=〇〇（&bg=1 で背景あり）を付けて撮影する -->
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; overflow: hidden; }
+  canvas { display: block; }
+</style>
+<canvas id="c"></canvas>
+<script>
+  const q = new URLSearchParams(location.search);
+  const s = +(q.get('size') || 32);
+  const withBg = q.get('bg') === '1'; // iPhone は透明部分を黒く塗るので、apple-touch-icon だけ背景を敷く
+  const c = document.getElementById('c');
+  c.width = c.height = s;
+  const g = c.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    if (withBg) {
+      const bg = g.createLinearGradient(0, 0, 0, s);
+      bg.addColorStop(0, '#f4f6f8');
+      bg.addColorStop(1, '#cdd3dc');
+      g.fillStyle = bg;
+      g.fillRect(0, 0, s, s);
+    }
+    // 背景ありのときは円を少し小さくして周りに余白を取る
+    const d = withBg ? s * 0.86 : s, o = (s - d) / 2;
+    g.imageSmoothingQuality = 'high';
+    g.save();
+    g.beginPath();
+    g.arc(s / 2, s / 2, d / 2, 0, Math.PI * 2);
+    g.clip();
+    g.drawImage(img, 0, 0, img.width, img.height, o, o, d, d);
+    g.restore();
+    // シルバーの縁取り
+    const w = Math.max(1, d * 0.045);
+    const ring = g.createLinearGradient(0, o, 0, o + d);
+    ring.addColorStop(0, '#ffffff');
+    ring.addColorStop(0.5, '#8a93a0');
+    ring.addColorStop(1, '#d9dee6');
+    g.lineWidth = w;
+    g.strokeStyle = ring;
+    g.beginPath();
+    g.arc(s / 2, s / 2, d / 2 - w / 2, 0, Math.PI * 2);
+    g.stroke();
+  };
+  img.src = 'favicon-src.jpg';
+</script>
+</html>

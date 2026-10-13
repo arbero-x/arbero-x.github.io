@@ -77,7 +77,10 @@ main { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
   font-size: clamp(64px, 21vw, 150px); letter-spacing: .02em;
   filter: drop-shadow(0 2px 0 rgba(255, 255, 255, .9)) drop-shadow(0 6px 10px rgba(40, 52, 72, .22));
 }
-.hero-sub { font-family: var(--f-mono); font-size: 13px; letter-spacing: .3em; color: var(--muted); margin: 10px 0 0; }
+.hero-sub {
+  font-family: var(--f-mono); font-size: 13px; letter-spacing: .14em; line-height: 1.6;
+  color: var(--muted); margin: 10px auto 0; max-width: 32em; text-wrap: balance;
+}
 
 /* ---------- discography stage ---------- */
 .disco { scroll-margin-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); padding-block: 8px 32px; }

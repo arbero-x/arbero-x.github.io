@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<!-- OGP 画像の元。scripts/build-ogp.sh で 1200×1200 の public/ogp.png に書き出す -->
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&display=block">
+<style>
+  html, body { margin: 0; width: 1200px; height: 1200px; overflow: hidden; }
+  body {
+    display: grid; place-items: center;
+    background:
+      radial-gradient(120% 60% at 50% 0%, #fbfcfd 0%, rgba(251, 252, 253, 0) 60%),
+      linear-gradient(180deg, #e8ebf0 0%, #cdd3dc 100%);
+    background-color: #e8ebf0;
+  }
+  /* サイトのヒーロー「arbero」と同じクローム文字・影 */
+  h1 {
+    margin: 0; line-height: 1;
+    font-family: "Audiowide", "Arial Black", sans-serif; font-weight: 400;
+    font-size: 240px; letter-spacing: .02em;
+    background: linear-gradient(180deg, #ffffff 0%, #d9dee6 34%, #6c7584 50%, #f2f4f7 58%, #a3abb7 82%, #e9edf2 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    -webkit-text-stroke: 2px rgba(58, 64, 74, .45);
+    filter: drop-shadow(0 4px 0 rgba(255, 255, 255, .9)) drop-shadow(0 14px 22px rgba(40, 52, 72, .22));
+  }
+</style>
+<h1>arbero</h1>
+</html>

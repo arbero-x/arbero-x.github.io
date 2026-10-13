@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>arbero</title>
+  <meta name="description" content="HIPHOP アーティスト arbero のオフィシャルサイト。Discography、Bandcamp での試聴、MV。">
+  <meta name="theme-color" content="#e8ebf0">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="arbero">
+  <meta property="og:title" content="arbero">
+  <meta property="og:description" content="HIPHOP アーティスト arbero のオフィシャルサイト。Discography、Bandcamp での試聴、MV。">
+  <meta property="og:url" content="https://arbero-x.github.io/">
+  <meta property="og:image" content="https://arbero-x.github.io/covers/penguin.webp">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@arbero_x">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=M+PLUS+1p:wght@400;700;800&family=Share+Tech+Mono&display=swap">
+  <link rel="preload" as="image" href="/covers/penguin.webp">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo chrome" href="#top" aria-label="arbero トップへ">arbero</a>
+      <a class="nav-link" href="#discography">Discography</a>
+      <a class="icon-link" href="https://x.com/arbero_x" target="_blank" rel="noopener" aria-label="arbero の X">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+      </a>
+      <a class="icon-link" href="https://www.youtube.com/@arbero_x" target="_blank" rel="noopener" aria-label="arbero の YouTube チャンネル">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero wrap">
+      <h1 class="hero-mark chrome">arbero</h1>
+      <p class="hero-sub">HIPHOP ARTIST</p>
+    </section>
+
+    <section class="disco wrap" id="discography" aria-label="Discography">
+      <p class="eyebrow">Discography</p>
+      <div class="stage-shell">
+        <span class="sparkle s1"></span><span class="sparkle s2"></span><span class="sparkle s3"></span>
+        <a class="stage" id="stage" href="https://arbero.bandcamp.com/track/penguin">
+          <img class="fallback" id="fallback" src="/covers/penguin.webp" alt="">
+        </a>
+      </div>
+      <p class="tap-hint">ケースをタップで Bandcamp へ ↗</p>
+      <div class="release-meta">
+        <p class="release-title" id="releaseTitle">Penguin</p>
+        <p class="release-date" id="releaseDate">2026.10.13 RELEASE</p>
+      </div>
+      <div class="switcher" id="switcher" role="group" aria-label="シングルを切り替え"></div>
+    </section>
+
+    <section class="section wrap" id="listen">
+      <h2>Listen <small>BANDCAMP</small></h2>
+      <div class="panel bandcamp" id="bandcamp"></div>
+    </section>
+
+    <section class="section wrap">
+      <h2>Music Video <small>YOUTUBE</small></h2>
+      <div class="mv" id="mv"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <img class="footer-sign" src="/signature.webp" alt="" width="1954" height="805" loading="lazy">
+    <span>© 2026 arbero</span>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -113,6 +113,8 @@ let suppressClick = false;
 
 stage.addEventListener('pointerdown', ev => {
   if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+  // 指のスワイプの後は click が発生しないことがあるため、前のジェスチャーの「クリック無視」を持ち越さない
+  suppressClick = false;
   const fromEdge = ev.pointerType === 'touch' && (ev.clientX < EDGE || ev.clientX > innerWidth - EDGE);
   g = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, t0: performance.now(), mode: 'pending', fromEdge, lastX: ev.clientX, lastT: performance.now(), vx: 0 };
 });
@@ -159,7 +161,8 @@ stage.addEventListener('pointerup', ev => endGesture(ev, false));
 stage.addEventListener('pointercancel', ev => endGesture(ev, true));
 
 stage.addEventListener('click', ev => {
-  if (suppressClick) {
+  // キーボードの Enter（detail === 0）はジェスチャーと無関係なので、無視の対象にしない
+  if (suppressClick && ev.detail !== 0) {
     suppressClick = false;
     ev.preventDefault();
     return;

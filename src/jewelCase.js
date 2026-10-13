@@ -167,40 +167,62 @@ export function initJewelCase({ stage, coverImgs, obiCanvases, initial, reduceMo
       stage.classList.remove('is-hot');
     });
   }
-  // ケース以外の余白をタップしたときは遷移しない（キーボード操作の Enter は detail === 0 なので通す）
-  stage.addEventListener('click', ev => {
-    if (ev.detail !== 0 && !hitTest(ev)) ev.preventDefault();
-  });
+  // ---------- 切替・ドラッグ・案内の動き ----------
+  // ドラッグ中は指の移動量に合わせてケースを傾け、離したら回転して切り替えるか元に戻す
+  let dragTarget = 0, dragCur = 0;
+  function setDrag(angle) { dragTarget = angle; }
+  function releaseDrag() { dragTarget = 0; }
 
-  // 切替：1回転して、裏面が向いたタイミングでジャケットと帯を差し替え
+  // 切替：dir の向き（-1 = 左、+1 = 右）に1回転し、裏面が向いたタイミングでジャケットと帯を差し替え
   let spin = null;
-  function swapTo(i) {
-    if (reduceMotion) { setRelease(i); return; }
+  function swapTo(i, dir = -1) {
+    dragTarget = 0;
+    if (reduceMotion) { dragCur = 0; setRelease(i); return; }
     if (spin) {
       spin.to = i;
       if (spin.swapped) setRelease(i);
       return;
     }
-    spin = { start: performance.now(), dur: 900, to: i, swapped: false };
+    spin = { start: performance.now(), dur: 900, from: dragCur, end: dir * Math.PI * 2, to: i, swapped: false };
+    dragCur = 0;
   }
   const ease = p => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+  const easeOut = p => 1 - Math.pow(1 - p, 3);
+
+  // スワイプの案内：一度だけ左にスッと動いて戻る
+  let nudgeStart = -1;
+  function nudge() { if (!reduceMotion) nudgeStart = performance.now(); }
 
   const clock = new THREE.Clock();
   let px = 0, py = 0, sc = 1, first = true;
   function loop() {
     const t = clock.getElapsedTime();
+    const now = performance.now();
     px += (pointer.x - px) * 0.06;
     py += (pointer.y - py) * 0.06;
+    dragCur += (dragTarget - dragCur) * 0.25;
+
     let s = 0;
     if (spin) {
-      const p = Math.min((performance.now() - spin.start) / spin.dur, 1);
-      s = ease(p) * Math.PI * 2;
-      if (!spin.swapped && s >= Math.PI) { setRelease(spin.to); spin.swapped = true; }
+      const p = Math.min((now - spin.start) / spin.dur, 1);
+      s = spin.from + (spin.end - spin.from) * (spin.from ? easeOut(p) : ease(p));
+      if (!spin.swapped && Math.abs(s) >= Math.PI) { setRelease(spin.to); spin.swapped = true; }
       if (p >= 1) spin = null;
     }
+
+    let nudgeY = 0, nudgeX = 0;
+    if (nudgeStart >= 0) {
+      const p = Math.min((now - nudgeStart) / 1100, 1);
+      const k = Math.sin(Math.PI * p) * (1 - p * 0.3);
+      nudgeY = -0.45 * k;
+      nudgeX = -1.1 * k;
+      if (p >= 1) nudgeStart = -1;
+    }
+
     const idleY = reduceMotion ? -0.18 : Math.sin(t * 0.45) * 0.38;
-    group.rotation.y = idleY + s + px * 0.28;
+    group.rotation.y = idleY + s + dragCur + nudgeY + px * 0.28;
     group.rotation.x = -0.06 + (reduceMotion ? 0 : Math.sin(t * 0.7) * 0.04) + py * 0.14;
+    group.position.x = dragCur * 2.2 + nudgeX;
     group.position.y = reduceMotion ? 0 : Math.sin(t * 1.1) * 0.18;
     sc += ((hover ? 1.04 : 1) - sc) * 0.12;
     group.scale.setScalar(sc);
@@ -210,5 +232,5 @@ export function initJewelCase({ stage, coverImgs, obiCanvases, initial, reduceMo
   }
   loop();
 
-  return { swapTo };
+  return { swapTo, setDrag, releaseDrag, nudge, hitTest };
 }

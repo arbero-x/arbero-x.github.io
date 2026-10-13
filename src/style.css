@@ -117,6 +117,8 @@ main { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
   position: relative; display: block; margin: 0 auto;
   width: 100%; max-width: 560px; height: min(96vw, 460px);
   text-decoration: none; -webkit-tap-highlight-color: transparent; cursor: pointer;
+  touch-action: pan-y; /* 縦スクロールはブラウザ、横の動きはスワイプとして受け取る */
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .stage:has(canvas) { cursor: default; }
 .stage.is-hot { cursor: pointer; }
@@ -131,22 +133,38 @@ main { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
 .release-title { font-family: var(--f-display); font-size: clamp(24px, 7vw, 34px); margin: 0; line-height: 1.2; text-wrap: balance; }
 .release-date { font-family: var(--f-mono); font-size: 14px; color: var(--muted); letter-spacing: .1em; margin: 4px 0 0; font-variant-numeric: tabular-nums; }
 
-.switcher { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; position: relative; }
-.sw {
-  min-height: 44px; padding: 0 20px; border-radius: 999px; cursor: pointer;
-  font-family: var(--f-mono); font-size: 14px; letter-spacing: .1em; color: var(--fg);
-  background: linear-gradient(180deg, #ffffff 0%, #dfe4ea 52%, #c3cad4 53%, #d9dee5 100%);
-  border: 1px solid #98a1ae;
-  box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(30, 40, 60, .16);
-  transition: box-shadow .2s, transform .1s;
+/* インジケーター：見た目は小さな点、タップできる範囲は 44px */
+.switcher { display: flex; justify-content: center; gap: 4px; margin-top: 10px; position: relative; }
+.dot {
+  width: 44px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer;
+  display: grid; place-items: center;
 }
-.sw:active { transform: translateY(1px); }
-.sw[aria-pressed="true"] {
-  color: var(--accent-ink); border-color: #46a6c8;
-  background: linear-gradient(180deg, #f2fcff 0%, #b9ebfa 52%, #86d6f0 53%, #a9e3f6 100%);
-  box-shadow: inset 0 1px 0 #fff, 0 0 0 3px rgba(127, 211, 240, .35), 0 0 18px rgba(127, 211, 240, .65);
+.dot::before {
+  content: ""; width: 12px; height: 12px; border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff, #c3cad4);
+  border: 1px solid #98a1ae; box-shadow: inset 0 1px 0 #fff;
+  transition: background .2s, box-shadow .2s, transform .2s;
 }
-.sw .num { opacity: .6; margin-right: 6px; }
+.dot[aria-pressed="true"]::before {
+  background: linear-gradient(180deg, #f2fcff, #86d6f0);
+  border-color: #46a6c8; transform: scale(1.15);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 3px rgba(127, 211, 240, .35), 0 0 12px rgba(127, 211, 240, .7);
+}
+
+/* スワイプの案内矢印：ケースの左側で、左へ向かってゆっくり動く */
+.swipe-hint {
+  position: absolute; left: 10px; top: 50%; z-index: 1; pointer-events: none;
+  width: 36px; height: 36px; margin-top: -18px; display: grid; place-items: center;
+  border-radius: 50%; background: rgba(250, 251, 252, .75);
+  border: 1px solid var(--line); box-shadow: inset 0 1px 0 #fff, 0 2px 6px rgba(30, 40, 60, .15);
+  animation: hint-left 1.6s ease-in-out infinite;
+}
+.swipe-hint svg { width: 20px; height: 20px; fill: none; stroke: var(--accent-ink); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes hint-left {
+  0%, 100% { transform: translateX(0); opacity: .55; }
+  50% { transform: translateX(-8px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .swipe-hint { animation: none; } }
 
 /* ---------- listen / mv ---------- */
 .section { padding-block: 28px; }

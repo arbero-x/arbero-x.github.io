@@ -25,7 +25,8 @@ const dots = releases.map((r, i) => {
 
 // ---------- Bandcamp 試聴プレイヤー ----------
 function bandcampSrc(r) {
-  return `https://bandcamp.com/EmbeddedPlayer/track=${r.bandcampTrackId}/size=large/bgcol=ffffff/linkcol=${r.bandcampLinkColor}/tracklist=false/artwork=small/transparent=true/`;
+  const track = encodeURIComponent(r.bandcampTrackId), link = encodeURIComponent(r.bandcampLinkColor);
+  return `https://bandcamp.com/EmbeddedPlayer/track=${track}/size=large/bgcol=ffffff/linkcol=${link}/tracklist=false/artwork=small/transparent=true/`;
 }
 function renderPlayer(r) {
   const box = $('bandcamp');
@@ -50,13 +51,29 @@ function renderMV(r) {
   b.type = 'button';
   b.className = 'mv-thumb';
   b.setAttribute('aria-label', `${r.title} の MV を再生`);
-  b.innerHTML = `
-    <img src="https://i.ytimg.com/vi/${r.youtubeId}/hqdefault.jpg" alt="" loading="lazy">
-    <span class="yt"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg></span>
-    <span class="mv-label">${r.title} — Music Video</span>`;
+  // データは HTML として解釈させず、要素とテキストとして組み立てる
+  const id = encodeURIComponent(r.youtubeId);
+  const img = document.createElement('img');
+  img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  img.alt = '';
+  img.loading = 'lazy';
+  const yt = document.createElement('span');
+  yt.className = 'yt';
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 10 12');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', 'M0 0l10 6-10 6z');
+  svg.appendChild(path);
+  yt.appendChild(svg);
+  const label = document.createElement('span');
+  label.className = 'mv-label';
+  label.textContent = `${r.title} — Music Video`;
+  b.append(img, yt, label);
   b.addEventListener('click', () => {
     const f = document.createElement('iframe');
-    f.src = `https://www.youtube-nocookie.com/embed/${r.youtubeId}?autoplay=1&playsinline=1&rel=0`;
+    f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`;
     f.title = `${r.title} — Music Video`;
     f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
     f.allowFullscreen = true;

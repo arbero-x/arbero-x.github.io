@@ -28,11 +28,11 @@ function bandcampSrc(r) {
   const track = encodeURIComponent(r.bandcampTrackId), link = encodeURIComponent(r.bandcampLinkColor);
   return `https://bandcamp.com/EmbeddedPlayer/track=${track}/size=large/bgcol=ffffff/linkcol=${link}/tracklist=false/artwork=small/transparent=true/`;
 }
-// 発売前で Bandcamp / YouTube がまだない曲は、プレイヤーの代わりに公開予定日を出す
-function pendingNote(r, what) {
+// 発売前で Bandcamp / YouTube がまだない曲は、プレイヤーの代わりに COMING SOON を出す
+function pendingNote() {
   const p = document.createElement('p');
   p.className = 'pending';
-  p.textContent = `${what}は ${r.date} 公開予定`;
+  p.textContent = 'COMING SOON';
   return p;
 }
 
@@ -40,7 +40,7 @@ function renderPlayer(r) {
   const box = $('bandcamp');
   box.replaceChildren();
   if (!r.bandcampTrackId) {
-    box.appendChild(pendingNote(r, '試聴'));
+    box.appendChild(pendingNote());
     return;
   }
   const f = document.createElement('iframe');
@@ -60,7 +60,7 @@ function renderMV(r) {
   const box = $('mv');
   box.replaceChildren();
   if (!r.youtubeId) {
-    box.appendChild(pendingNote(r, 'MV'));
+    box.appendChild(pendingNote());
     return;
   }
   const b = document.createElement('button');

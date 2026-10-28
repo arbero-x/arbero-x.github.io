@@ -252,3 +252,17 @@ async function start3D() {
   }
 }
 start3D();
+
+// ---------- 隠し要素：フッターのサインを 3 回続けてタップすると、グラフィティを吹き付ける ----------
+const sign = document.querySelector('.footer-sign');
+let signTaps = [];
+sign?.addEventListener('click', () => {
+  const now = performance.now();
+  signTaps = signTaps.filter(t => now - t < 1200);
+  signTaps.push(now);
+  if (signTaps.length < 3) return;
+  signTaps = [];
+  import('./graffitiEgg.js')
+    .then(m => m.openGraffiti({ reduceMotion, returnFocus: document.activeElement }))
+    .catch(e => console.warn('グラフィティを開けませんでした', e));
+});

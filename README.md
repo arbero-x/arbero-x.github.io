@@ -18,6 +18,7 @@ npm run dev
 2. `src/data/releases.json` の末尾に 1 件追加する
    - `bandcampTrackId`：Bandcamp の Share / Embed で出る埋め込みコードの `track=数字`
    - `youtubeId`：MV の URL の `v=` の後ろ
-   - `obi`：帯の文字と色（既存の 2 件を参考に）
+   - `obi`：帯の文字と色（既存の曲を参考に）
+   - 発売前で Bandcamp / YouTube がまだないときは、`bandcampTrackId` と `youtubeId` を `null` にし、`bandcampUrl` を `https://arbero.bandcamp.com/` にする。試聴と MV の欄に「◯◯ 公開予定」と出る
 
 切替ボタンはリリース順に並び、最初は一番新しいシングルが表示されます。

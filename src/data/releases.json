@@ -52,5 +52,32 @@
       "priceInk": "#c9262c",
       "sigColor": "#c9262c"
     }
+  },
+  {
+    "no": "03",
+    "title": "ProMotion",
+    "date": "2026.11.01",
+    "cover": "/covers/promotion.webp",
+    "bandcampUrl": "https://arbero.bandcamp.com/",
+    "bandcampTrackId": null,
+    "bandcampLinkColor": "0c0c0c",
+    "youtubeId": null,
+    "obi": {
+      "catNo": "ARB-003",
+      "stereo": true,
+      "bg": "#0c0c0c",
+      "ink": "#ffffff",
+      "paper": false,
+      "catchBg": "#bfe32f",
+      "catchInk": "#0c0c0c",
+      "catchSide": "left",
+      "title": "アルベロ／プロモーション",
+      "catch": "自主制作3rdシングル",
+      "copy": ["今世だけに", "全Bet賭ける"],
+      "taxNote": "",
+      "panelBg": null,
+      "priceInk": "#bfe32f",
+      "sigColor": "#ffffff"
+    }
   }
 ]

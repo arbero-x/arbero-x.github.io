@@ -28,9 +28,21 @@ function bandcampSrc(r) {
   const track = encodeURIComponent(r.bandcampTrackId), link = encodeURIComponent(r.bandcampLinkColor);
   return `https://bandcamp.com/EmbeddedPlayer/track=${track}/size=large/bgcol=ffffff/linkcol=${link}/tracklist=false/artwork=small/transparent=true/`;
 }
+// 発売前で Bandcamp / YouTube がまだない曲は、プレイヤーの代わりに公開予定日を出す
+function pendingNote(r, what) {
+  const p = document.createElement('p');
+  p.className = 'pending';
+  p.textContent = `${what}は ${r.date} 公開予定`;
+  return p;
+}
+
 function renderPlayer(r) {
   const box = $('bandcamp');
   box.replaceChildren();
+  if (!r.bandcampTrackId) {
+    box.appendChild(pendingNote(r, '試聴'));
+    return;
+  }
   const f = document.createElement('iframe');
   f.title = `${r.title} by arbero（Bandcamp 試聴プレイヤー）`;
   f.src = bandcampSrc(r);
@@ -47,6 +59,10 @@ function renderPlayer(r) {
 function renderMV(r) {
   const box = $('mv');
   box.replaceChildren();
+  if (!r.youtubeId) {
+    box.appendChild(pendingNote(r, 'MV'));
+    return;
+  }
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'mv-thumb';

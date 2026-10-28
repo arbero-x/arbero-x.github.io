@@ -243,4 +243,3 @@ main { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
 .footer-links a:hover { box-shadow: inset 0 1px 0 #fff, 0 0 0 3px rgba(127, 211, 240, .3), 0 0 14px rgba(127, 211, 240, .5); }
 .footer-links a:active { transform: translateY(1px); }
 .fl-name { font-family: var(--f-body); font-weight: 700; font-size: 15px; letter-spacing: .02em; color: var(--fg); }
-.fl-note { font-family: var(--f-body); font-size: 11px; letter-spacing: .04em; color: var(--muted); }

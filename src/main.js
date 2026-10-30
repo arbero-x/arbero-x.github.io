@@ -263,8 +263,8 @@ sign?.addEventListener('click', () => {
   if (signTaps.length < 3) return;
   signTaps = [];
   import('./graffitiEgg.js')
-    .then(m => m.openGraffiti({ reduceMotion, returnFocus: document.activeElement }))
-    .catch(e => console.warn('グラフィティを開けませんでした', e));
+    .then(m => m.show({ reduceMotion, returnFocus: document.activeElement }))
+    .catch(e => console.warn('読み込みに失敗しました', e));
 });
 
 // ---------- Discord：ダイヤルロックで番号が合ったら招待リンクを出す ----------

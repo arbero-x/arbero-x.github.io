@@ -10,7 +10,7 @@ let source = null; // 画像の解析結果は一度だけ作る
 async function loadSource() {
   if (source) return source;
   const img = new Image();
-  img.src = '/graffiti.webp';
+  img.src = '/fx.webp';
   await img.decode();
   const c = document.createElement('canvas');
   const w = (c.width = img.naturalWidth), h = (c.height = img.naturalHeight);
@@ -73,12 +73,12 @@ function classify(src, cols, rows) {
   return { kind, chars };
 }
 
-export async function openGraffiti({ reduceMotion, returnFocus }) {
-  if (document.querySelector('.graffiti-egg')) return;
+export async function show({ reduceMotion, returnFocus }) {
+  if (document.querySelector('.fx-layer')) return;
   const src = await loadSource();
 
   const overlay = document.createElement('div');
-  overlay.className = 'graffiti-egg';
+  overlay.className = 'fx-layer';
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', 'arbero のグラフィティ（タップか Esc で閉じる）');
@@ -86,11 +86,11 @@ export async function openGraffiti({ reduceMotion, returnFocus }) {
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-hidden', 'true');
   const note = document.createElement('p');
-  note.className = 'graffiti-egg-note';
+  note.className = 'fx-note';
   note.textContent = 'タップで閉じる';
   overlay.append(canvas, note);
   document.body.appendChild(overlay);
-  document.documentElement.classList.add('egg-open');
+  document.documentElement.classList.add('fx-open');
   overlay.focus();
 
   const ctx = canvas.getContext('2d');
@@ -158,7 +158,7 @@ export async function openGraffiti({ reduceMotion, returnFocus }) {
     removeEventListener('resize', onResize);
     document.removeEventListener('keydown', onKey);
     overlay.remove();
-    document.documentElement.classList.remove('egg-open');
+    document.documentElement.classList.remove('fx-open');
     returnFocus?.focus?.();
   }
   const onResize = () => { resize(); render(performance.now()); };

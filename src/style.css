@@ -231,3 +231,73 @@ main { padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
 .footer-links a:hover { box-shadow: inset 0 1px 0 var(--panel), 0 0 12px var(--accent); }
 .footer-links a:active { transform: translateY(1px); }
 .fl-name { font-family: var(--f-body); font-weight: 700; font-size: 15px; letter-spacing: .02em; color: var(--fg); }
+
+/* Discord のダイヤルロック（src/dialLock.js）：真鍮の枠に銀のダイヤル */
+.dial-lock { border: 0; padding: 0; background: none; overflow: visible; max-width: none; }
+.dial-lock::backdrop { background: rgba(20, 22, 26, .72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.dl-close {
+  position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); right: 14px; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--panel); color: var(--fg); font-size: 22px; line-height: 1; cursor: pointer;
+}
+.dl-wrap { display: grid; justify-items: center; gap: 18px; padding: 8px; }
+.dl-body {
+  position: relative; width: 300px; border-radius: 16px; padding: 22px 18px 18px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 240, 200, .06) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #f3d98b 0%, #c99a3e 22%, #8a6420 55%, #a87c2e 82%, #e2c070 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 246, 214, .7), inset 0 -3px 0 rgba(60, 38, 6, .6), 0 18px 30px rgba(0, 0, 0, .45);
+}
+.dl-body.shake { animation: dl-shake .42s; }
+@keyframes dl-shake {
+  0%, 100% { transform: translateX(0); } 15% { transform: translateX(-10px) rotate(-1.5deg); }
+  35% { transform: translateX(9px) rotate(1deg); } 55% { transform: translateX(-6px); } 75% { transform: translateX(4px); }
+}
+.dl-screw {
+  position: absolute; width: 12px; height: 12px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1c4, #b8892f 55%, #4f3810); box-shadow: 0 1px 1px rgba(40, 24, 0, .7);
+}
+.dl-screw::after { content: ""; position: absolute; left: 2px; right: 2px; top: 5px; height: 2px; background: #3d2a08; transform: rotate(35deg); }
+.dl-screw.tl { top: 8px; left: 8px; } .dl-screw.tr { top: 8px; right: 8px; }
+.dl-screw.bl { bottom: 8px; left: 8px; } .dl-screw.br { bottom: 8px; right: 8px; }
+.dl-window {
+  position: relative; display: flex; justify-content: center; gap: 8px; padding: 0 10px;
+  height: 118px; border-radius: 8px; overflow: hidden; perspective: 420px; background: #0d0f12;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 240, 200, .5);
+}
+.dl-window::after { /* 円筒の陰影 */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .85) 0%, transparent 34%, transparent 66%, rgba(0, 0, 0, .85) 100%);
+}
+.dl-index { position: absolute; top: 50%; margin-top: -7px; border: 7px solid transparent; z-index: 2; }
+.dl-index.l { left: 2px; border-left-color: var(--accent); }
+.dl-index.r { right: 2px; border-right-color: var(--accent); }
+.dl-wheel { position: relative; width: 54px; height: 100%; cursor: grab; touch-action: none; outline: none; }
+.dl-wheel:active { cursor: grabbing; }
+.dl-wheel:focus-visible { box-shadow: 0 0 0 2px var(--accent); border-radius: 4px; }
+.dl-drum { position: absolute; left: 0; right: 0; top: 50%; height: 0; transform-style: preserve-3d; }
+.dl-face {
+  position: absolute; left: 0; top: -22px; width: 54px; height: 44px; backface-visibility: hidden;
+  display: grid; place-items: center; user-select: none; -webkit-user-select: none;
+  font: 700 30px/1 "Arial Black", Arial, sans-serif; color: #24272c;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .65), 0 -1px 0 rgba(0, 0, 0, .35);
+  background: linear-gradient(180deg, #8d949e 0%, #dfe3e8 30%, #f4f6f8 50%, #c9ced5 72%, #858c96 100%);
+  border-top: 1px solid rgba(0, 0, 0, .35);
+}
+.dl-face::before, .dl-face::after { /* ローレット（滑り止めのギザギザ） */
+  content: ""; position: absolute; top: 0; bottom: 0; width: 7px;
+  background: repeating-linear-gradient(180deg, #3b4048 0 2px, #b9bfc7 2px 4px);
+}
+.dl-face::before { left: 0; } .dl-face::after { right: 0; }
+.dl-pull, .dl-go {
+  min-height: 52px; padding: 0 28px; border-radius: 26px; cursor: pointer;
+  font: 700 15px var(--f-body); letter-spacing: .04em;
+}
+.dl-pull {
+  color: var(--fg); border: 1px solid #3a3f47;
+  background: linear-gradient(180deg, #ffffff 0%, #d9dee6 45%, #a3abb7 55%, #e9edf2 100%);
+  box-shadow: inset 0 1px 0 #fff, 0 3px 0 #3a3f47;
+}
+.dl-pull:active { transform: translateY(2px); box-shadow: inset 0 1px 0 #fff, 0 1px 0 #3a3f47; }
+.dl-pull[disabled] { opacity: .6; cursor: wait; }
+.dl-go { display: inline-grid; place-items: center; text-decoration: none; color: var(--accent-ink); background: var(--accent); box-shadow: 0 0 18px var(--accent); }
+@media (prefers-reduced-motion: reduce) { .dl-body.shake { animation: none; } }

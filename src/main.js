@@ -266,3 +266,12 @@ sign?.addEventListener('click', () => {
     .then(m => m.openGraffiti({ reduceMotion, returnFocus: document.activeElement }))
     .catch(e => console.warn('グラフィティを開けませんでした', e));
 });
+
+// ---------- Discord：ダイヤルロックで番号が合ったら招待リンクを出す ----------
+document.getElementById('discordLink')?.addEventListener('click', ev => {
+  ev.preventDefault();
+  const link = ev.currentTarget;
+  import('./dialLock.js')
+    .then(m => m.openDialLock({ reduceMotion, returnFocus: link }))
+    .catch(e => console.warn('ダイヤルロックを開けませんでした', e));
+});

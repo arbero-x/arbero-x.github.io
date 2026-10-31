@@ -73,6 +73,12 @@ function renderMV(r) {
   img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
   img.alt = '';
   img.loading = 'lazy';
+  // 動画が公開前だと YouTube は 120×90 の灰色の画像を返すので、その間はジャケット画像を出す
+  img.addEventListener('load', () => {
+    if (img.naturalWidth > 120 || img.classList.contains('is-cover')) return;
+    img.classList.add('is-cover');
+    img.src = r.cover;
+  });
   const yt = document.createElement('span');
   yt.className = 'yt';
   const SVG_NS = 'http://www.w3.org/2000/svg';

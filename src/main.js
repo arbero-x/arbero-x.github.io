@@ -259,6 +259,13 @@ async function start3D() {
 }
 start3D();
 
+// ---------- 背景の ASCII グッピー（ページの表示が落ち着いてから読み込む） ----------
+const startGuppy = () => import('./guppy.js')
+  .then(m => m.startGuppy({ reduceMotion }))
+  .catch(e => console.warn('背景のアニメーションを読み込めませんでした', e));
+if ('requestIdleCallback' in window) requestIdleCallback(startGuppy, { timeout: 2000 });
+else setTimeout(startGuppy, 600);
+
 // ---------- 隠し要素：フッターのサインを 3 回続けてタップすると、グラフィティを吹き付ける ----------
 const sign = document.querySelector('.footer-sign');
 let signTaps = [];

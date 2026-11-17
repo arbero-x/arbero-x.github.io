@@ -2,10 +2,10 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>arbero</title>
-  <meta name="description" content="Internet Underground Hyper Nerd Rapper arbero のオフィシャルサイト。Discography、Bandcamp での試聴、MV。">
-  <meta name="theme-color" content="#e8ebf0">
+  <meta name="description" content="Experimental HipHop VTuber arbero のオフィシャルサイト。Discography、Bandcamp での試聴、MV。">
+  <meta name="theme-color" content="#000000">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="arbero">
   <meta property="og:title" content="arbero">
-  <meta property="og:description" content="Internet Underground Hyper Nerd Rapper arbero のオフィシャルサイト。Discography、Bandcamp での試聴、MV。">
+  <meta property="og:description" content="Experimental HipHop VTuber arbero のオフィシャルサイト。Discography、Bandcamp での試聴、MV。">
   <meta property="og:url" content="https://arbero-x.github.io/">
   <meta property="og:image" content="https://arbero-x.github.io/ogp.png">
   <meta property="og:image:width" content="1200">
@@ -24,66 +24,54 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=M+PLUS+1p:wght@400;700;800&family=Share+Tech+Mono&display=swap">
-  <link rel="preload" as="image" href="/covers/promotion.webp">
+  <!-- Share Tech Mono と M PLUS 1p は隠し要素とダイヤルロックでだけ使う（使われたときに初めてダウンロードされる） -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&family=Share+Tech+Mono&family=M+PLUS+1p:wght@700&display=swap">
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="logo chrome" href="#top" aria-label="arbero トップへ">arbero</a>
-      <a class="nav-link" href="#discography">Discography</a>
-      <a class="icon-link" href="https://x.com/arbero_x" target="_blank" rel="noopener" aria-label="arbero の X">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
-      </a>
-      <a class="icon-link" href="https://www.youtube.com/@arbero_x?sub_confirmation=1" target="_blank" rel="noopener" aria-label="YouTube で arbero をチャンネル登録">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a>
+  <canvas id="field" aria-label="arbero を操作してフィールドを歩くゲーム。LIST ボタンから全リリースとリンクの一覧を開けます"></canvas>
+
+  <div id="hud">
+    <div class="tag"><h1>arbero</h1><small>EXPERIMENTAL HIPHOP VTUBER</small></div>
+    <button type="button" id="listBtn" aria-haspopup="dialog">LIST</button>
+  </div>
+  <div id="hint">WASD で移動　SPACE で調べる</div>
+
+  <div id="dlg" role="dialog" aria-live="polite">
+    <button type="button" id="dlgClose" aria-label="閉じる">×</button>
+    <div class="no" id="dNo"></div>
+    <h2 id="dTitle"></h2>
+    <div class="sub" id="dSub"></div>
+    <p id="dText"></p>
+    <div id="links"></div>
+  </div>
+
+  <div id="pad" aria-hidden="true">
+    <button type="button" class="u" data-k="up" tabindex="-1">W</button><button type="button" class="l" data-k="left" tabindex="-1">A</button>
+    <button type="button" class="r" data-k="right" tabindex="-1">D</button><button type="button" class="d" data-k="down" tabindex="-1">S</button>
+  </div>
+  <button type="button" id="abtn" aria-label="調べる" tabindex="-1">SPACE</button>
+  <p id="copy">© 2026 arbero</p>
+
+  <button type="button" id="listClose">FIELD</button>
+  <section id="list" aria-label="リリースとリンクの一覧" hidden>
+    <div class="in">
+      <h1>arbero</h1>
+      <div class="role">EXPERIMENTAL HIPHOP VTUBER</div>
+      <div id="releases"></div>
+      <article><div class="meta">LINKS</div>
+        <p class="link-row">
+          <a href="https://www.youtube.com/@arbero_x?sub_confirmation=1" target="_blank" rel="noopener">YouTube</a>
+          <a href="https://arbero.bandcamp.com/" target="_blank" rel="noopener">Bandcamp</a>
+          <a href="https://x.com/arbero_x" target="_blank" rel="noopener">X</a>
+          <a href="https://soundcloud.com/arbero_x" target="_blank" rel="noopener">SoundCloud</a>
+          <a href="https://note.com/arbero_x" target="_blank" rel="noopener">note</a>
+          <a href="https://marshmallow-qa.com/albero_niveo?t=IONPa5&amp;utm_medium=url_text&amp;utm_source=promotion" target="_blank" rel="noopener">マシュマロ</a>
+          <a href="#discord" id="discordLink" aria-haspopup="dialog">Discord</a>
+        </p>
+      </article>
+      <p class="copy">© 2026 arbero</p>
     </div>
-  </header>
-
-  <main id="top">
-    <section class="hero wrap">
-      <h1 class="hero-mark chrome">arbero</h1>
-      <p class="hero-sub">Internet Underground Hyper Nerd Rapper</p>
-    </section>
-
-    <section class="disco wrap" id="discography" aria-label="Discography">
-      <p class="eyebrow">Discography</p>
-      <div class="stage-shell">
-        <span class="swipe-hint" id="swipeHint" aria-hidden="true" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></span>
-        <a class="stage" id="stage" href="https://arbero.bandcamp.com/">
-          <img class="fallback" id="fallback" src="/covers/promotion.webp" alt="" draggable="false">
-        </a>
-      </div>
-      <p class="tap-hint">← スワイプで過去の曲 ／ タップで Bandcamp ↗</p>
-      <div class="release-meta">
-        <p class="release-title" id="releaseTitle">ProMotion</p>
-        <p class="release-date" id="releaseDate">2026.11.01 RELEASE</p>
-      </div>
-      <div class="switcher" id="switcher" role="group" aria-label="表示中のシングル"></div>
-    </section>
-
-    <section class="section wrap" id="listen">
-      <h2>Listen <small>BANDCAMP</small></h2>
-      <div class="panel bandcamp" id="bandcamp"></div>
-    </section>
-
-    <section class="section wrap">
-      <h2>Music Video <small>YOUTUBE</small></h2>
-      <div class="mv" id="mv"></div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <nav class="footer-links" aria-label="arbero のリンク">
-      <a href="https://marshmallow-qa.com/albero_niveo?t=IONPa5&amp;utm_medium=url_text&amp;utm_source=promotion" target="_blank" rel="noopener"><span class="fl-name">マシュマロ</span></a>
-      <a href="https://soundcloud.com/arbero_x" target="_blank" rel="noopener"><span class="fl-name">SoundCloud</span></a>
-      <a href="https://note.com/arbero_x" target="_blank" rel="noopener"><span class="fl-name">note</span></a>
-      <a href="#discord" id="discordLink" aria-haspopup="dialog"><span class="fl-name">Discord</span></a>
-    </nav>
-    <img class="footer-sign" src="/signature.webp" alt="" width="1954" height="805" loading="lazy">
-    <span>© 2026 arbero</span>
-  </footer>
+  </section>
 
   <script type="module" src="/src/main.js"></script>
 </body>

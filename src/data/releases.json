@@ -3,81 +3,36 @@
     "no": "01",
     "title": "Creative",
     "date": "2026.09.17",
+    "blurb": "arberoの1st Single。",
     "cover": "/covers/creative.webp",
     "bandcampUrl": "https://arbero.bandcamp.com/track/creative",
     "bandcampTrackId": "1561524836",
     "bandcampLinkColor": "0687f5",
     "youtubeId": "E1N1ADMdRVk",
-    "obi": {
-      "catNo": "ARB-001",
-      "stereo": true,
-      "bg": "#ecebe4",
-      "ink": "#141414",
-      "paper": true,
-      "catchBg": "#dcf21b",
-      "catchInk": "#141414",
-      "catchSide": "left",
-      "title": "アルベロ／クリエイティブ",
-      "catch": "初の自主制作シングル！",
-      "copy": ["日常と創作衝動を", "切り取った一曲。"],
-      "taxNote": "(税込)",
-      "panelBg": null,
-      "priceInk": "#141414",
-      "sigColor": "#2a2a2a"
-    }
+    "catNo": "ARB-001"
   },
   {
     "no": "02",
     "title": "Penguin",
     "date": "2026.10.13",
+    "blurb": "arberoの2nd Single。MV公開中。",
     "cover": "/covers/penguin.webp",
     "bandcampUrl": "https://arbero.bandcamp.com/track/penguin",
     "bandcampTrackId": "1174240501",
     "bandcampLinkColor": "e99708",
     "youtubeId": "UEm_xHdNeTI",
-    "obi": {
-      "catNo": "ARB-002",
-      "stereo": false,
-      "bg": "#c9262c",
-      "ink": "#ffffff",
-      "paper": false,
-      "catchBg": "#161616",
-      "catchInk": "#ffffff",
-      "catchSide": "right",
-      "title": "アルベロ／ペンギン",
-      "catch": "自主制作2ndシングル",
-      "copy": ["ビートの上では", "ペンギンになる。"],
-      "taxNote": "",
-      "panelBg": "#f4f1ea",
-      "priceInk": "#c9262c",
-      "sigColor": "#c9262c"
-    }
+    "catNo": "ARB-002"
   },
   {
     "no": "03",
     "title": "ProMotion",
     "date": "2026.11.01",
+    "blurb": "ファッションショーやガジェットCMをイメージした、エクスペリメンタルなHIPHOP。",
     "cover": "/covers/promotion.webp",
     "bandcampUrl": "https://arbero.bandcamp.com/track/promotion",
     "bandcampTrackId": "3809116884",
     "bandcampLinkColor": "2ebd35",
     "youtubeId": "C92hxfuASuA",
-    "obi": {
-      "catNo": "ARB-003",
-      "stereo": true,
-      "bg": "#0c0c0c",
-      "ink": "#ffffff",
-      "paper": false,
-      "catchBg": "#bfe32f",
-      "catchInk": "#0c0c0c",
-      "catchSide": "left",
-      "title": "アルベロ／プロモーション",
-      "catch": "自主制作3rdシングル",
-      "copy": ["今世だけに", "全Bet賭ける"],
-      "taxNote": "",
-      "panelBg": null,
-      "priceInk": "#bfe32f",
-      "sigColor": "#ffffff"
-    }
+    "catNo": "ARB-003"
   }
 ]

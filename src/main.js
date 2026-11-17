@@ -588,4 +588,4 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-setTimeout(() => talk('arbero', ['Welcome ! ようこそ！', 'WASDで移動、SPACEで調べるよ！'], null, { skippable: true }), 400);
+setTimeout(() => talk('arbero', ['Welcome ! ようこそ！\n（SPACEキーを押してね）', 'WASDで移動、SPACEで調べるよ！'], null, { skippable: true }), 400);

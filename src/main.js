@@ -103,32 +103,268 @@ for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
 }
 
 // ---------- スプライト ----------
-const PAL = { k: '#16161c', s: '#f3d3c0', b: '#3b8cff', g: '#8d929c', j: '#23232c', p: '#3dff5a', d: '#2e2e3a', h: '#0b0b0b' };
-const body = [
-  '...gggggg...',
-  '..jjggggjj..',
-  '.jjjggggjjj.',
-  '.jpjggggjjj.',
-  '.sjjggggjjs.',
-  '..jjjjjjjj..'];
-const headD = ['....kkkk....', '..kkkkkkkk..', '.kkkkkkkkkk.', '.kkkkkkkkkk.', '.kksssssskk.', '.ksbssssbsk.', '.ksbssssbsk.', '..ssssssss..'];
-const headU = ['....kkkk....', '..kkkkkkkk..', '.kkkkkkkkkk.', '.kkkkkkkkkk.', '.kkkkkkkkkk.', '.kkkkkkkkkk.', '.kkkkkkkkkk.', '..kkkkkkkk..'];
-const bodyU = body.map((r, i) => (i === 3 ? '.jjjggggjjj.' : r));
-const side = ['....kkkk....', '..kkkkkkk...', '.kkkkkkkkk..', '.kkkkkkkkkk.', '.kkkkssssk..', '.kkksssbs...', '.kkkssssss..', '..kksssss...',
-  '...gggggg...', '...jjgggj...', '..jjjgggj...', '..jjpgggj...', '..jjjggsj...', '...jjjjjj...'];
-const LEG = { f0: ['...dd..dd...', '...hh..dd...'], f1: ['...dd..dd...', '...dd..hh...'], s0: ['....dddd....', '....hhhh....'], s1: ['...dd...dd..', '...hh...hh..'], st: ['...dd..dd...', '...hh..hh...'], ss: ['....dd.dd...', '....hh.hh...'] };
+// arbero-sprite-preview.png（1 ドット 10px、1 コマ 18 × 26）から起こしたドット絵。1 文字 = 1 ドット、. = 透明
+const PAL = { a: '#15161d', b: '#2b4fb0', c: '#f6ece6', d: '#1d3a6b', e: '#7fd0f5', f: '#cdd0d6', g: '#35c0dc', h: '#24252e', i: '#e39a2e', j: '#9a9ea8', k: '#eef0f4', l: '#2238c0', m: '#e0198f', n: '#e2d13a', o: '#1fa08a', p: '#3a3b44', q: '#1b1c21' };
+const FRAMES = [
+  // 正面・立ち
+  [
+    '.....aaaaa......',
+    '...aaaaaaaaa....',
+    '..aaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    '.baaaaaaaaaaaab.',
+    'baaaaaacccccaaab',
+    '.baaaaacccdccab.',
+    'baaaaacccceccaab',
+    '.b.aaccccccca.b.',
+    '....b.ccccc.....',
+    '....ffffffff....',
+    '..hhffffffffhh..',
+    '.hhihfffffjhhhh.',
+    '.hhhhffffjflhhh.',
+    '.hnhhfffffflhgh.',
+    '.hhhhffffffhhmh.',
+    '.hohhffffffhhhh.',
+    '.chhhhhhhhhhhhc.',
+    '..ppppplpppppp..',
+    '..ppppp..ppppp..',
+    '..ppppp..ppppp..',
+    '..qqqlq..qlqqq..',
+    '.qqqqqq..qqqqqq.',
+  ],
+  // 正面・歩き 1
+  [
+    '.....aaaaa......',
+    '...aaaaaaaaa....',
+    '..aaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    '.baaaaaaaaaaaab.',
+    'baaaaaacccccaaab',
+    '.baaaaacccdccab.',
+    'baaaaacccceccaab',
+    '.b.aaccccccca.b.',
+    '....b.ccccc.....',
+    '....ffffffff....',
+    '..hhffffffffhh..',
+    '.hhihfffffjhhhh.',
+    '.hhhhffffjflhhh.',
+    '.hnhhfffffflhgh.',
+    '.hhhhffffffhhmh.',
+    '.hohhffffffhhhh.',
+    '.chhhhhhhhhhhhc.',
+    '..ppppplpppppp..',
+    '..ppppp..ppppp..',
+    '..ppppp..qlqqq..',
+    '..qqqlq..qqqqqq.',
+    '.qqqqqq.........',
+  ],
+  // 正面・歩き 2
+  [
+    '.....aaaaa......',
+    '...aaaaaaaaa....',
+    '..aaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    '.baaaaaaaaaaaab.',
+    'baaaaaacccccaaab',
+    '.baaaaacccdccab.',
+    'baaaaacccceccaab',
+    '.b.aaccccccca.b.',
+    '....b.ccccc.....',
+    '....ffffffff....',
+    '..hhffffffffhh..',
+    '.hhihfffffjhhhh.',
+    '.hhhhffffjflhhh.',
+    '.hnhhfffffflhgh.',
+    '.hhhhffffffhhmh.',
+    '.hohhffffffhhhh.',
+    '.chhhhhhhhhhhhc.',
+    '..ppppplpppppp..',
+    '..ppppp..ppppp..',
+    '..qqqlq..ppppp..',
+    '.qqqqqq..qlqqq..',
+    '.........qqqqqq.',
+  ],
+  // 後ろ・立ち
+  [
+    '.....aaaaa......',
+    '...aaaaaaaaa....',
+    '..aaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    'baaaaaaaaaaaaaab',
+    '.baaaaaaaaaaaab.',
+    'baaaaaaaaaaaaaab',
+    '.bbaaaaaaaaaabb.',
+    '..b.baaaaaab.b..',
+    '....fffggfff....',
+    '..hffffffffffh..',
+    '.hhhhhhhhhhhhhh.',
+    '.hhkkkkkkkkkkhh.',
+    '.hhhmmmmmmmmhhh.',
+    '.hghhhhhhhhhhnh.',
+    '.hhhhhhhhhhhhmh.',
+    '.hmhhhhhhhhghhh.',
+    '.chhhhhhhhhhhhc.',
+    '..pppppppppppp..',
+    '..ppppp..ppppp..',
+    '..ppppp..ppppp..',
+    '..qqqlq..qlqqq..',
+    '.qqqqqq..qqqqqq.',
+  ],
+  // 後ろ・歩き 1
+  [
+    '.....aaaaa......',
+    '...aaaaaaaaa....',
+    '..aaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    'baaaaaaaaaaaaaab',
+    '.baaaaaaaaaaaab.',
+    'baaaaaaaaaaaaaab',
+    '.bbaaaaaaaaaabb.',
+    '..b.baaaaaab.b..',
+    '....fffggfff....',
+    '..hffffffffffh..',
+    '.hhhhhhhhhhhhhh.',
+    '.hhkkkkkkkkkkhh.',
+    '.hhhmmmmmmmmhhh.',
+    '.hghhhhhhhhhhnh.',
+    '.hhhhhhhhhhhhmh.',
+    '.hmhhhhhhhhghhh.',
+    '.chhhhhhhhhhhhc.',
+    '..pppppppppppp..',
+    '..ppppp..ppppp..',
+    '..ppppp..qlqqq..',
+    '..qqqlq..qqqqqq.',
+    '.qqqqqq.........',
+  ],
+  // 後ろ・歩き 2
+  [
+    '.....aaaaa......',
+    '...aaaaaaaaa....',
+    '..aaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    'baaaaaaaaaaaaaab',
+    '.baaaaaaaaaaaab.',
+    'baaaaaaaaaaaaaab',
+    '.bbaaaaaaaaaabb.',
+    '..b.baaaaaab.b..',
+    '....fffggfff....',
+    '..hffffffffffh..',
+    '.hhhhhhhhhhhhhh.',
+    '.hhkkkkkkkkkkhh.',
+    '.hhhmmmmmmmmhhh.',
+    '.hghhhhhhhhhhnh.',
+    '.hhhhhhhhhhhhmh.',
+    '.hmhhhhhhhhghhh.',
+    '.chhhhhhhhhhhhc.',
+    '..pppppppppppp..',
+    '..ppppp..ppppp..',
+    '..qqqlq..ppppp..',
+    '.qqqqqq..qlqqq..',
+    '.........qqqqqq.',
+  ],
+  // 横（右向き）・立ち
+  [
+    '....aaaaaa......',
+    '..aaaaaaaaaa....',
+    '.aaaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    'baaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    'baaaaaaaaccaaa..',
+    '.baaaaaacccdca..',
+    'baaaaaacccceca..',
+    '.bbaaaaccccccc..',
+    '..b.b..ccccc....',
+    '.....ffffff.....',
+    '....hffffffh....',
+    '...hhhffflhh....',
+    '...hhnhfflhh....',
+    '...hhhhfffhh....',
+    '...hmhhhffhh....',
+    '...hhhhohhhh....',
+    '...hhhchhhhh....',
+    '....ppplppp.....',
+    '....ppppppp.....',
+    '....ppp.ppp.....',
+    '....qql.qql.....',
+    '....qqqqqqqqq...',
+  ],
+  // 横・歩き 1
+  [
+    '....aaaaaa......',
+    '..aaaaaaaaaa....',
+    '.aaaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    'baaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    'baaaaaaaaccaaa..',
+    '.baaaaaacccdca..',
+    'baaaaaacccceca..',
+    '.bbaaaaccccccc..',
+    '..b.b..ccccc....',
+    '.....ffffff.....',
+    '....hffffffh....',
+    '...hhhffflhh....',
+    '...hhnhfflhh....',
+    '...hhhhfffhh....',
+    '...hmhhhffhh....',
+    '...hhhhohhhh....',
+    '...hhhchhhhh....',
+    '....ppplppp.....',
+    '...pppp..ppp....',
+    '..ppp....ppp....',
+    '..qql.....qql...',
+    '..qqqq....qqqqq.',
+  ],
+  // 横・歩き 2
+  [
+    '....aaaaaa......',
+    '..aaaaaaaaaa....',
+    '.aaaaaaaaaaaa...',
+    '.aaaaaaaaaaaaa..',
+    'baaaaaaaaaaaaa..',
+    '.aaaaaaaaaaaaaa.',
+    'baaaaaaaaccaaa..',
+    '.baaaaaacccdca..',
+    'baaaaaacccceca..',
+    '.bbaaaaccccccc..',
+    '..b.b..ccccc....',
+    '.....ffffff.....',
+    '....hffffffh....',
+    '...hhhffflhh....',
+    '...hhnhfflhh....',
+    '...hhhhfffhh....',
+    '...hmhhhffhh....',
+    '...hhhhohhhh....',
+    '...hhhchhhhh....',
+    '....ppplppp.....',
+    '....pppppp......',
+    '....pppppp......',
+    '....qqlqql......',
+    '....qqqqqqqq....',
+  ],
+];
+const SPR_W = FRAMES[0][0].length + 2, SPR_H = FRAMES[0].length + 2; // 黒いふちの分だけ 1 ドットずつ広い
 function mk(rows) {
   const c = document.createElement('canvas');
-  c.width = 14; c.height = rows.length + 2;
+  c.width = SPR_W; c.height = SPR_H;
   const x = c.getContext('2d');
+  // 暗い床でも見えるよう、まわりに 1 ドットの黒いふちを付ける
   rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { x.fillStyle = '#000'; x.fillRect(i, y, 3, 3); } }));
   rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { x.fillStyle = PAL[ch]; x.fillRect(i + 1, y + 1, 1, 1); } }));
   return c;
 }
+// 向きごとに [立ち, 歩き 1, 歩き 2]。横は右向きで、左へ歩くときは左右反転して描く
 const SPR = {
-  down: [mk([...headD, ...body, ...LEG.st]), mk([...headD, ...body, ...LEG.f0]), mk([...headD, ...body, ...LEG.f1])],
-  up: [mk([...headU, ...bodyU, ...LEG.st]), mk([...headU, ...bodyU, ...LEG.f0]), mk([...headU, ...bodyU, ...LEG.f1])],
-  side: [mk([...side, ...LEG.ss]), mk([...side, ...LEG.s0]), mk([...side, ...LEG.s1])],
+  down: FRAMES.slice(0, 3).map(mk),
+  up: FRAMES.slice(3, 6).map(mk),
+  side: FRAMES.slice(6, 9).map(mk),
 };
 
 // ---------- canvas ----------
@@ -563,10 +799,10 @@ function draw(t) {
       y: P.y,
       f: () => {
         const sx = Math.round(P.x - cx), sy = Math.round(P.y - cy);
-        ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(sx, sy, 5, 2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(sx, sy, 7, 2, 0, 0, Math.PI * 2); ctx.fill();
         const fr = P.moving ? 1 + (((P.anim * 7) | 0) % 2) : 0, img = SPR[P.dir][fr], bobY = P.moving && fr === 1 ? -1 : 0;
-        if (P.dir === 'side' && P.flip) { ctx.save(); ctx.translate(sx, 0); ctx.scale(-1, 1); ctx.drawImage(img, -7, sy - 17 + bobY); ctx.restore(); }
-        else ctx.drawImage(img, sx - 7, sy - 17 + bobY);
+        if (P.dir === 'side' && P.flip) { ctx.save(); ctx.translate(sx, 0); ctx.scale(-1, 1); ctx.drawImage(img, -SPR_W / 2, sy - SPR_H + 1 + bobY); ctx.restore(); }
+        else ctx.drawImage(img, sx - SPR_W / 2, sy - SPR_H + 1 + bobY);
       },
     },
   ];

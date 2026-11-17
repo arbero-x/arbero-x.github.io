@@ -8,8 +8,8 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = id => document.getElementById(id);
 
 const T = 16;
-// 文字＝部屋（c:CREATIVE  s:スタート  p:Penguin  m:ProMotion  v:テレビ）／記号＝オブジェクト
-// 1/2/3：CD（releases.json の 1〜3 曲目）  T：端末  S：スタート位置  M：ポスト  N：ノート  U：スピーカー  D：Discord の扉  V：テレビ
+// 文字＝部屋（c:CREATIVE  s:スタート  i:Penguin の部屋と通路（氷の床）  m:ProMotion  v:テレビ）／記号＝オブジェクト
+// 1/2/3：CD（releases.json の 1〜3 曲目）  T：端末  S：スタート位置  M：ポスト  N：ノート  U：スピーカー  D：Discord の扉  V：テレビ  G：ペンギン
 const RAW = [
   '', '', '',
   '...ccccccc',
@@ -17,11 +17,11 @@ const RAW = [
   '...ccccccc',
   '......c',
   '......c',
-  '......c.........ppppppp',
-  '...sssssss......ppppppp',
-  '...sTsSsssppppppppp2ppp',
-  '...sssssss......ppppppp',
-  '...MsNsUsD......ppppppp',
+  '......c.........iiiiiii',
+  '...sssssss......Giiiiii',
+  '...sTsSsssiiiiiiiii2iii',
+  '...sssssss......iiiiiii',
+  '...MsNsUsD......iiiiiii',
   '......m',
   '......m',
   '...mmmmmmm',
@@ -40,7 +40,7 @@ const MAP = RAW.map(r => r.padEnd(W, '.'));
 const H = MAP.length;
 const at = (tx, ty) => (MAP[ty] && MAP[ty][tx]) || '.';
 const walk = c => c !== '.';
-const ZONE_OF = { 1: 'c', 2: 'p', 3: 'm', T: 's', S: 's', V: 'v', M: 's', N: 's', U: 's', D: 's' };
+const ZONE_OF = { i: 'p', G: 'p', 1: 'c', 2: 'p', 3: 'm', T: 's', S: 's', V: 'v', M: 's', N: 's', U: 's', D: 's' };
 const zoneOf = c => ZONE_OF[c] || c;
 // 部屋ごとの配色
 const TH = {
@@ -50,7 +50,8 @@ const TH = {
   m: { a: '#050505', b: '#0c0c0c', dot: '#2c2c2c', edge: '#3dff5a', side: '#1c7a2e', side2: '#0a3312', bg: [0, 0, 0], pt: '#145a22', pb: '#3dff5a', acc: '#3dff5a' },
   v: { a: '#0e0e10', b: '#121215', dot: '#1e1e22', edge: '#4a4a52', side: '#2a2a30', side2: '#151518', bg: [0, 0, 0], pt: '#1c1c20', pb: '#55555c', acc: '#8a8a90' },
 };
-const solidCh = c => c === '.' || '123TVMNUD'.includes(c);
+const solidCh = c => c === '.' || '123TVMNUDG'.includes(c);
+const ICE = 'i';
 
 // ---------- 中身 ----------
 const L = {
@@ -98,7 +99,7 @@ const objs = [];
 let px = 0, py = 0;
 for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
   const c = at(x, y);
-  if ('123TVMNUD'.includes(c)) objs.push({ k: c, x: x * T + 8, y: y * T + 10, ph: Math.random() * 6 });
+  if ('123TVMNUDG'.includes(c)) objs.push({ k: c, x: x * T + 8, y: y * T + 10, ph: Math.random() * 6 });
   if (c === 'S') { px = x * T + 8; py = y * T + 12; }
 }
 
@@ -636,11 +637,40 @@ function blocked(x, y) {
   }
   return false;
 }
+// ---------- 氷の床（Penguin の部屋）：押した向きに、壁や物にぶつかるまで滑り続ける ----------
+// (tx, ty) から (sx, sy) の向きに滑って止まるマス。氷の外（通路）に出たら、そのマスで止まる
+function slideStop(tx, ty, sx, sy) {
+  let x = tx, y = ty;
+  for (;;) {
+    const c = at(x + sx, y + sy);
+    if (solidCh(c)) break;
+    x += sx; y += sy;
+    if (c !== ICE) break;
+  }
+  return [x, y];
+}
+let slide = null; // 滑っている間の行き先（マスの中心）
+function updateIce(dt, dx, dy, tx, ty) {
+  if (!slide && (dx || dy)) {
+    const sx = dx ? Math.sign(dx) : 0, sy = dx ? 0 : Math.sign(dy);
+    if (sx) { P.dir = 'side'; P.flip = sx < 0; } else P.dir = sy < 0 ? 'up' : 'down';
+    const [gx, gy] = slideStop(tx, ty, sx, sy);
+    if (gx !== tx || gy !== ty) slide = { x: gx * T + 8, y: gy * T + 12 };
+  }
+  if (slide) {
+    const ddx = slide.x - P.x, ddy = slide.y - P.y, d = Math.hypot(ddx, ddy), step = 150 * dt;
+    if (d <= step) { P.x = slide.x; P.y = slide.y; slide = null; } else { P.x += (ddx / d) * step; P.y += (ddy / d) * step; }
+  }
+  P.moving = false; P.anim = 0; // 滑っている間は立ちポーズのまま
+}
 function update(dt) {
   let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
   if (open && skipOnMove && (dx || dy) && !overlayOpen()) closeDlg(); // 移動キー（画面の WASD ボタンも）で最初の会話を飛ばす
-  if (open || overlayOpen()) dx = dy = 0;
-  P.moving = !!(dx || dy);
+  const paused = open || overlayOpen();
+  if (paused) dx = dy = 0;
+  const tx = Math.floor(P.x / T), ty = Math.floor((P.y - 2) / T);
+  if (slide || at(tx, ty) === ICE) { if (!paused) updateIce(dt, dx, dy, tx, ty); dx = dy = 0; P.moving = false; }
+  else P.moving = !!(dx || dy);
   if (P.moving) {
     const l = Math.hypot(dx, dy), sp = 64 * dt;
     dx = (dx / l) * sp; dy = (dy / l) * sp;
@@ -655,7 +685,7 @@ function update(dt) {
   for (let i = 0; i < 3; i++) bgc[i] += (tb[i] - bgc[i]) * k;
   near = null;
   let best = 22;
-  for (const o of objs) { const d = Math.hypot(o.x - P.x, o.y - P.y); if (d < best) { best = d; near = o; } }
+  for (const o of objs) { if (o.k === 'G') continue; const d = Math.hypot(o.x - P.x, o.y - P.y); if (d < best) { best = d; near = o; } }
   if (open && typed < full.length) {
     tAcc += dt;
     while (tAcc > 0.03 && typed < full.length) { tAcc -= 0.03; typed++; }
@@ -669,6 +699,7 @@ function tile(x, y, sx, sy) {
   const th = TH[zoneOf(at(x, y))];
   ctx.fillStyle = (x + y) % 2 ? th.b : th.a; ctx.fillRect(sx, sy, T, T);
   ctx.fillStyle = th.dot; ctx.fillRect(sx + 7, sy + 7, 2, 2);
+  if (at(x, y) === ICE) { ctx.fillStyle = '#ffffff'; ctx.fillRect(sx + 3, sy + 3, 3, 1); ctx.fillRect(sx + 3, sy + 4, 1, 1); ctx.fillRect(sx + 11, sy + 11, 2, 1); } // 氷のつや
   ctx.fillStyle = th.edge;
   if (!walk(at(x, y - 1))) ctx.fillRect(sx, sy, T, 1);
   if (!walk(at(x - 1, y))) ctx.fillRect(sx, sy, 1, T);
@@ -733,6 +764,40 @@ function drawTV(sx, sy) {
   ctx.fillStyle = '#000'; ctx.fillRect(sx - 7, sy - 3, 3, 3); ctx.fillRect(sx + 4, sy - 3, 3, 3);
   ctx.fillStyle = '#3a3a40'; ctx.fillRect(sx - 4, sy - 23, 1, 3); ctx.fillRect(sx + 3, sy - 24, 1, 4);
 }
+// ペンギン（Penguin の部屋の入口の 1 マス上）。滑っていても入口で止まれるよう、通せんぼの役もする。ときどき羽をぱたぱたさせる
+const PENGUIN_PAL = { k: '#1a1d2a', w: '#f4f6fa', e: '#000000', o: '#ff9e1f' };
+const PENGUIN_BODY = [
+  '....kkkk....',
+  '...kkkkkk...',
+  '..kkkkkkkk..',
+  '..kwwkkwwk..',
+  '..kwekkewk..',
+  '..kwwoowwk..',
+];
+const PENGUIN_LEGS = [
+  '.kkwwwwwwkk.',
+  '.kkwwwwwwkk.',
+  '..kwwwwwwk..',
+  '..kkwwwwkk..',
+  '...oo..oo...',
+];
+const PENGUIN = [
+  [...PENGUIN_BODY, '.kkwwwwwwkk.', '.kkwwwwwwkk.', ...PENGUIN_LEGS], // 羽を下ろす
+  [...PENGUIN_BODY, 'kkkwwwwwwkkk', 'k.kwwwwwwk.k', ...PENGUIN_LEGS], // 羽を広げる
+].map(rows => {
+  const c = document.createElement('canvas');
+  c.width = rows[0].length + 2; c.height = rows.length + 2;
+  const g = c.getContext('2d');
+  rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { g.fillStyle = '#000'; g.fillRect(i, y, 3, 3); } }));
+  rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { g.fillStyle = PENGUIN_PAL[ch]; g.fillRect(i + 1, y + 1, 1, 1); } }));
+  return c;
+});
+function drawPenguin(sx, sy, t) {
+  const flap = (t % 3) < 0.5 && ((t * 8) | 0) % 2 === 0; // 3 秒に 1 回、ぱたぱた
+  const img = PENGUIN[flap ? 1 : 0];
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(sx, sy - 1, 5, 2, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.drawImage(img, Math.round(sx - img.width / 2), sy - img.height);
+}
 function pr(c, x, y, w, h) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
 function drawProp(k, sx, sy, t) {
   const K = '#000', Wh = '#f4f4f4', G = '#8a8a90', D = '#2a2a30';
@@ -792,7 +857,8 @@ function draw(t) {
       y: o.y,
       f: () => (o.k === 'T' ? drawTerm(o.x - cx, o.y - cy + 2, t)
         : o.k === 'V' ? drawTV(o.x - cx, o.y - cy + 2)
-          : 'MNUD'.includes(o.k) ? drawProp(o.k, o.x - cx, o.y - cy + 2, t)
+          : o.k === 'G' ? drawPenguin(o.x - cx, o.y - cy + 2, t)
+            : 'MNUD'.includes(o.k) ? drawProp(o.k, o.x - cx, o.y - cy + 2, t)
             : drawCD(o, o.x - cx, o.y - cy, t)),
     })),
     {

@@ -1,27 +1,80 @@
 <!doctype html>
 <html lang="ja">
-<!-- OGP 画像の元。scripts/build-ogp.sh で 1200×1200 の public/ogp.png に書き出す -->
+<!-- OGP 画像の元。scripts/build-ogp.sh で 1200×1200 の public/ogp.png に書き出す。
+     トップページのゲーム（src/main.js）と同じドット絵：星空・スタート部屋の床・arbero・3 枚の CD -->
 <meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=block">
 <style>
-  html, body { margin: 0; width: 1200px; height: 1200px; overflow: hidden; }
-  body {
-    display: grid; place-items: center;
-    background:
-      radial-gradient(120% 60% at 50% 0%, #fbfcfd 0%, rgba(251, 252, 253, 0) 60%),
-      linear-gradient(180deg, #e8ebf0 0%, #cdd3dc 100%);
-    background-color: #e8ebf0;
+  html, body { margin: 0; width: 1200px; height: 1200px; overflow: hidden; background: #000; }
+  canvas { position: absolute; inset: 0; width: 1200px; height: 1200px; image-rendering: pixelated; }
+  .tag {
+    position: absolute; left: 50%; top: 150px; transform: translateX(-50%);
+    background: #f4f4f4; color: #000; padding: 34px 48px 30px; text-align: center; white-space: nowrap;
+    box-shadow: 0 0 0 10px #000, 0 0 0 20px #f4f4f4;
   }
-  /* サイトのヒーロー「arbero」と同じクローム文字・影 */
-  h1 {
-    margin: 0; line-height: 1;
-    font-family: "Audiowide", "Arial Black", sans-serif; font-weight: 400;
-    font-size: 240px; letter-spacing: .02em;
-    background: linear-gradient(180deg, #ffffff 0%, #d9dee6 34%, #6c7584 50%, #f2f4f7 58%, #a3abb7 82%, #e9edf2 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    -webkit-text-stroke: 2px rgba(58, 64, 74, .45);
-    filter: drop-shadow(0 4px 0 rgba(255, 255, 255, .9)) drop-shadow(0 14px 22px rgba(40, 52, 72, .22));
-  }
+  .tag h1 { margin: 0; font: 400 120px/1 "Press Start 2P", monospace; letter-spacing: .02em; }
+  .tag p { margin: 22px 0 0; font: 400 40px/1 "DotGothic16", monospace; letter-spacing: .06em; }
 </style>
-<h1>arbero</h1>
+<canvas id="c" width="120" height="120"></canvas>
+<div class="tag"><h1>arbero</h1><p>EXPERIMENTAL HIPHOP VTUBER</p></div>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+// 星（毎回同じ並びになるよう、決まった乱数で）
+let seed = 7;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 120, 120);
+for (let i = 0; i < 90; i++) {
+  const b = rnd() < 0.18;
+  ctx.fillStyle = b ? '#f4f4f4' : '#3a3a42';
+  ctx.fillRect((rnd() * 120) | 0, (rnd() * 120) | 0, 1, b ? 2 : 1);
+}
+// スタート部屋の床（5 × 2 マス、1 マス 16）
+const T = 16, fx = 20, fy = 76, cols = 5, rows = 2;
+for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+  const sx = fx + x * T, sy = fy + y * T;
+  ctx.fillStyle = (x + y) % 2 ? '#202026' : '#1b1b1f'; ctx.fillRect(sx, sy, T, T);
+  ctx.fillStyle = '#2e2e35'; ctx.fillRect(sx + 7, sy + 7, 2, 2);
+}
+ctx.fillStyle = '#f4f4f4';
+ctx.fillRect(fx, fy, cols * T, 1); ctx.fillRect(fx, fy, 1, rows * T); ctx.fillRect(fx + cols * T - 1, fy, 1, rows * T); ctx.fillRect(fx, fy + rows * T - 1, cols * T, 1);
+ctx.fillStyle = '#8a8a90'; ctx.fillRect(fx, fy + rows * T, cols * T, 3);
+ctx.fillStyle = '#3a3a40'; ctx.fillRect(fx, fy + rows * T + 3, cols * T, 2);
+
+// arbero（src/main.js のスプライトと同じ）
+const PAL = { k: '#16161c', s: '#f3d3c0', b: '#3b8cff', g: '#8d929c', j: '#23232c', p: '#3dff5a', d: '#2e2e3a', h: '#0b0b0b' };
+const rowsD = ['....kkkk....', '..kkkkkkkk..', '.kkkkkkkkkk.', '.kkkkkkkkkk.', '.kksssssskk.', '.ksbssssbsk.', '.ksbssssbsk.', '..ssssssss..',
+  '...gggggg...', '..jjggggjj..', '.jjjggggjjj.', '.jpjggggjjj.', '.sjjggggjjs.', '..jjjjjjjj..', '...dd..dd...', '...hh..hh...'];
+function sprite(rows, ox, oy) {
+  rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { ctx.fillStyle = '#000'; ctx.fillRect(ox + i, oy + y, 3, 3); } }));
+  rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { ctx.fillStyle = PAL[ch]; ctx.fillRect(ox + i + 1, oy + y + 1, 1, 1); } }));
+}
+const px = 60, py = 103; // 足もと
+
+// CD（CREATIVE / Penguin / ProMotion の色）。床の台座の上に浮かせる。ドット絵らしく 1 画素ずつ塗る
+function disc(cx, base, col, ring) {
+  // 台座：横長の楕円の輪と、薄い光の柱
+  ctx.globalAlpha = 0.16; ctx.fillStyle = ring; ctx.fillRect(cx - 6, base - 20, 12, 20); ctx.globalAlpha = 1;
+  ctx.fillStyle = ring;
+  for (let t = 0; t < 64; t++) { const a = (t / 64) * Math.PI * 2; ctx.fillRect(Math.round(cx + Math.cos(a) * 7), Math.round(base + Math.sin(a) * 3), 1, 1); }
+  const cy = base - 14;
+  for (let y = -9; y <= 9; y++) for (let x = -9; x <= 9; x++) {
+    const d = Math.hypot(x, y);
+    let c = null;
+    if (d <= 9.4) c = "#000";
+    if (d <= 8.4) c = "#e9e9e9";
+    if (d <= 5.6) c = col;
+    if (d <= 2.6) c = "#555";
+    if (d <= 1.2) c = "#000";
+    if (c) { ctx.fillStyle = c; ctx.fillRect(cx + x, cy + y, 1, 1); }
+  }
+  ctx.fillStyle = "#fff"; ctx.fillRect(cx - 4, cy - 7, 3, 1); ctx.fillRect(cx - 6, cy - 5, 1, 2); // つや
+}
+disc(31, 84, "#ffe600", "#ffe600");
+disc(60, 84, "#9fd3ff", "#ffffff");
+disc(89, 84, "#3dff5a", "#3dff5a");
+// arbero を CD より手前に
+ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(px, py, 5, 2, 0, 0, Math.PI * 2); ctx.fill();
+sprite(rowsD, px - 7, py - 17);
+</script>
 </html>

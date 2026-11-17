@@ -9,7 +9,7 @@ const $ = id => document.getElementById(id);
 
 const T = 16;
 // 文字＝部屋（c:CREATIVE  s:スタート  i:Penguin の部屋と通路（氷の床）  m:ProMotion  v:テレビ）／記号＝オブジェクト
-// 1/2/3：CD（releases.json の 1〜3 曲目）  T：端末  S：スタート位置  M：ポスト  N：ノート  U：スピーカー  D：Discord の扉  V：テレビ  G：ペンギン
+// 1/2/3：CD（releases.json の 1〜3 曲目）  T：端末  S：スタート位置  M：ポスト  N：ノート  U：スピーカー  D：Discord の扉  V：テレビ  G：ペンギン  C：配信カメラ（ツイキャス）
 const RAW = [
   '', '', '',
   '...ccccccc',
@@ -18,7 +18,7 @@ const RAW = [
   '......c',
   '......c',
   '......c.........iiiiiii',
-  '...sssssss......Giiiiii',
+  '...Cssssss......Giiiiii',
   '...sTsSsssiiiiiiiii2iii',
   '...sssssss......iiiiiii',
   '...MsNsUsD......iiiiiii',
@@ -40,7 +40,7 @@ const MAP = RAW.map(r => r.padEnd(W, '.'));
 const H = MAP.length;
 const at = (tx, ty) => (MAP[ty] && MAP[ty][tx]) || '.';
 const walk = c => c !== '.';
-const ZONE_OF = { i: 'p', G: 'p', 1: 'c', 2: 'p', 3: 'm', T: 's', S: 's', V: 'v', M: 's', N: 's', U: 's', D: 's' };
+const ZONE_OF = { i: 'p', G: 'p', C: 's', 1: 'c', 2: 'p', 3: 'm', T: 's', S: 's', V: 'v', M: 's', N: 's', U: 's', D: 's' };
 const zoneOf = c => ZONE_OF[c] || c;
 // 部屋ごとの配色
 const TH = {
@@ -50,7 +50,7 @@ const TH = {
   m: { a: '#050505', b: '#0c0c0c', dot: '#2c2c2c', edge: '#3dff5a', side: '#1c7a2e', side2: '#0a3312', bg: [0, 0, 0], pt: '#145a22', pb: '#3dff5a', acc: '#3dff5a' },
   v: { a: '#0e0e10', b: '#121215', dot: '#1e1e22', edge: '#4a4a52', side: '#2a2a30', side2: '#151518', bg: [0, 0, 0], pt: '#1c1c20', pb: '#55555c', acc: '#8a8a90' },
 };
-const solidCh = c => c === '.' || '123TVMNUDG'.includes(c);
+const solidCh = c => c === '.' || '123TVMNUDGC'.includes(c);
 const ICE = 'i';
 
 // ---------- 中身 ----------
@@ -61,6 +61,7 @@ const L = {
   yt: ['YouTube', 'https://www.youtube.com/@arbero_x'],
   bc: ['Bandcamp', 'https://arbero.bandcamp.com/'],
   x: ['X', 'https://x.com/arbero_x'],
+  tc: ['ツイキャス', 'https://twitcasting.tv/arbero_x/archive/'],
 };
 // CD：ゲームでの表記と色。曲の情報と Bandcamp の URL は releases.json から取る
 const CD = {
@@ -71,10 +72,11 @@ const CD = {
 const INFO = {
   M: { no: 'MAILBOX', title: 'マシュマロ', sub: '匿名でメッセージを送れます', text: '（下のボタンから開く）', links: [L.mm], col: '#f4f4f4' },
   U: { no: 'SPEAKER', title: 'SoundCloud', sub: '', text: '（下のボタンから開く）', links: [L.sc], col: '#f4f4f4' },
+  C: { no: 'ON AIR', title: 'ツイキャス', sub: '配信のアーカイブ', text: '（下のボタンから開く）', links: [L.tc], col: '#f4f4f4' },
   N: { no: 'NOTEBOOK', title: 'note', sub: '', text: '（下のボタンから開く）', links: [L.nt], col: '#f4f4f4' },
   T: { no: 'TERMINAL', title: 'arbero NET AREA', sub: 'EXPERIMENTAL HIPHOP VTUBER', text: 'ようこそ。\n回っているCDに近づいて、調べてみて。', links: [L.x, L.yt, L.bc], col: '#f4f4f4' },
 };
-const OBJ_URL = { M: L.mm[1], U: L.sc[1], N: L.nt[1] };
+const OBJ_URL = { M: L.mm[1], U: L.sc[1], N: L.nt[1], C: L.tc[1] };
 for (const [k, c] of Object.entries(CD)) {
   const r = releases[c.i];
   if (!r) continue;
@@ -84,7 +86,7 @@ for (const [k, c] of Object.entries(CD)) {
   INFO[k] = { no: `${r.catNo} / ${r.date} RELEASE`, title: c.title, sub: c.sub, text: `${r.blurb}\n（下のボタンからBandcampへ）`, links, col: c.col };
   OBJ_URL[k] = r.bandcampUrl;
 }
-const LABEL = { T: 'TERMINAL', V: '???', M: 'MARSHMALLOW', U: 'SOUNDCLOUD', N: 'NOTE', D: 'DISCORD' };
+const LABEL = { T: 'TERMINAL', V: '???', M: 'MARSHMALLOW', U: 'SOUNDCLOUD', N: 'NOTE', D: 'DISCORD', C: 'TWITCASTING' };
 const TV_SCRIPT = ['よく見つけたね！', 'わざわざ見に来てくれてありがとね！', '（実はセリフはこれで終わりです）'];
 const TV_LOOP = ['・・・', '暇なんですか？'];
 let tvOn = false, tvSeen = false;
@@ -99,7 +101,7 @@ const objs = [];
 let px = 0, py = 0;
 for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
   const c = at(x, y);
-  if ('123TVMNUDG'.includes(c)) objs.push({ k: c, x: x * T + 8, y: y * T + 10, ph: Math.random() * 6 });
+  if ('123TVMNUDGC'.includes(c)) objs.push({ k: c, x: x * T + 8, y: y * T + 10, ph: Math.random() * 6 });
   if (c === 'S') { px = x * T + 8; py = y * T + 12; }
 }
 
@@ -378,7 +380,8 @@ let ctx = floorL.g;
 let S = 2, VW = 0, VH = 0, K = 2, camX = 0, camY = 0;
 function resize() {
   S = Math.max(2, Math.floor(Math.min(innerWidth, innerHeight) / 200));
-  VW = Math.ceil(innerWidth / S); VH = Math.ceil(innerHeight / S);
+  // 隠れたタブなどで画面の大きさが 0 のまま読み込まれても、描画が止まらないよう最低 1 にする
+  VW = Math.max(1, Math.ceil(innerWidth / S)); VH = Math.max(1, Math.ceil(innerHeight / S));
   K = S * Math.min(devicePixelRatio || 1, 2); // 1 ドットが画面の canvas で何画素か
   for (const l of [floorL, topL]) { l.c.width = VW; l.c.height = VH; l.g.imageSmoothingEnabled = false; }
   cv.width = Math.round(VW * K); cv.height = Math.round(VH * K);
@@ -814,6 +817,13 @@ function drawProp(k, sx, sy, t) {
     pr(K, sx - 1, sy - 6, 3, 6);
     pr(K, sx - 8, sy - 14, 16, 9); pr(Wh, sx - 7, sy - 13, 7, 7); pr(Wh, sx + 1, sy - 13, 6, 7);
     for (let i = 0; i < 3; i++) { pr(G, sx - 6, sy - 12 + i * 2, 5, 1); pr(G, sx + 2, sy - 12 + i * 2, 4, 1); }
+  } else if (k === 'C') { // 配信カメラ（低い三脚）。部屋の角の 1 マスに収まる大きさ。ON AIR のランプが点滅する
+    pr(K, sx - 1, sy - 6, 3, 4); pr(G, sx, sy - 6, 1, 3);
+    pr(K, sx - 4, sy - 3, 9, 3); pr(G, sx - 3, sy - 2, 1, 1); pr(G, sx, sy - 2, 1, 1); pr(G, sx + 3, sy - 2, 1, 1);
+    pr(K, sx - 6, sy - 14, 11, 9); pr(D, sx - 5, sy - 13, 9, 7); pr('#3a3a40', sx - 5, sy - 13, 9, 2);
+    pr(K, sx + 4, sy - 13, 4, 6); pr(G, sx + 5, sy - 12, 2, 4); pr('#7fd0f5', sx + 5, sy - 11, 1, 2);
+    const on = Math.sin(t * 4) > -0.2;
+    pr(K, sx - 5, sy - 17, 5, 4); pr(on ? '#ff2a3a' : '#5a1016', sx - 4, sy - 16, 3, 2);
   } else if (k === 'D') { // 鍵のかかった扉
     pr(K, sx - 7, sy - 22, 14, 22); pr('#3a3a40', sx - 6, sy - 21, 12, 21);
     pr(D, sx - 4, sy - 19, 8, 8); pr(D, sx - 4, sy - 9, 8, 7);
@@ -858,7 +868,7 @@ function draw(t) {
       f: () => (o.k === 'T' ? drawTerm(o.x - cx, o.y - cy + 2, t)
         : o.k === 'V' ? drawTV(o.x - cx, o.y - cy + 2)
           : o.k === 'G' ? drawPenguin(o.x - cx, o.y - cy + 2, t)
-            : 'MNUD'.includes(o.k) ? drawProp(o.k, o.x - cx, o.y - cy + 2, t)
+            : 'MNUDC'.includes(o.k) ? drawProp(o.k, o.x - cx, o.y - cy + (o.k === 'C' ? 5 : 2), t)
             : drawCD(o, o.x - cx, o.y - cy, t)),
     })),
     {

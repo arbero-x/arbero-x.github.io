@@ -41,15 +41,39 @@ ctx.fillRect(fx, fy, cols * T, 1); ctx.fillRect(fx, fy, 1, rows * T); ctx.fillRe
 ctx.fillStyle = '#8a8a90'; ctx.fillRect(fx, fy + rows * T, cols * T, 3);
 ctx.fillStyle = '#3a3a40'; ctx.fillRect(fx, fy + rows * T + 3, cols * T, 2);
 
-// arbero（src/main.js のスプライトと同じ）
-const PAL = { k: '#16161c', s: '#f3d3c0', b: '#3b8cff', g: '#8d929c', j: '#23232c', p: '#3dff5a', d: '#2e2e3a', h: '#0b0b0b' };
-const rowsD = ['....kkkk....', '..kkkkkkkk..', '.kkkkkkkkkk.', '.kkkkkkkkkk.', '.kksssssskk.', '.ksbssssbsk.', '.ksbssssbsk.', '..ssssssss..',
-  '...gggggg...', '..jjggggjj..', '.jjjggggjjj.', '.jpjggggjjj.', '.sjjggggjjs.', '..jjjjjjjj..', '...dd..dd...', '...hh..hh...'];
+// arbero（src/main.js のスプライトの「正面・立ち」と同じ）
+const PAL = { a: '#15161d', b: '#2b4fb0', c: '#f6ece6', d: '#1d3a6b', e: '#7fd0f5', f: '#cdd0d6', g: '#35c0dc', h: '#24252e', i: '#e39a2e', j: '#9a9ea8', k: '#eef0f4', l: '#2238c0', m: '#e0198f', n: '#e2d13a', o: '#1fa08a', p: '#3a3b44', q: '#1b1c21' };
+const rowsD = [
+  '.....aaaaa......',
+  '...aaaaaaaaa....',
+  '..aaaaaaaaaaa...',
+  '.aaaaaaaaaaaaa..',
+  '.aaaaaaaaaaaaaa.',
+  '.baaaaaaaaaaaab.',
+  'baaaaaacccccaaab',
+  '.baaaaacccdccab.',
+  'baaaaacccceccaab',
+  '.b.aaccccccca.b.',
+  '....b.ccccc.....',
+  '....ffffffff....',
+  '..hhffffffffhh..',
+  '.hhihfffffjhhhh.',
+  '.hhhhffffjflhhh.',
+  '.hnhhfffffflhgh.',
+  '.hhhhffffffhhmh.',
+  '.hohhffffffhhhh.',
+  '.chhhhhhhhhhhhc.',
+  '..ppppplpppppp..',
+  '..ppppp..ppppp..',
+  '..ppppp..ppppp..',
+  '..qqqlq..qlqqq..',
+  '.qqqqqq..qqqqqq.',
+];
 function sprite(rows, ox, oy) {
   rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { ctx.fillStyle = '#000'; ctx.fillRect(ox + i, oy + y, 3, 3); } }));
   rows.forEach((r, y) => [...r].forEach((ch, i) => { if (ch !== '.') { ctx.fillStyle = PAL[ch]; ctx.fillRect(ox + i + 1, oy + y + 1, 1, 1); } }));
 }
-const px = 60, py = 103; // 足もと
+const px = 60, py = 105; // 足もと
 
 // CD（CREATIVE / Penguin / ProMotion の色）。床の台座の上に浮かせる。ドット絵らしく 1 画素ずつ塗る
 function disc(cx, base, col, ring) {
@@ -74,7 +98,7 @@ disc(31, 84, "#ffe600", "#ffe600");
 disc(60, 84, "#9fd3ff", "#ffffff");
 disc(89, 84, "#3dff5a", "#3dff5a");
 // arbero を CD より手前に
-ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(px, py, 5, 2, 0, 0, Math.PI * 2); ctx.fill();
-sprite(rowsD, px - 7, py - 17);
+ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(px, py, 7, 2, 0, 0, Math.PI * 2); ctx.fill();
+sprite(rowsD, px - 9, py - 25);
 </script>
 </html>

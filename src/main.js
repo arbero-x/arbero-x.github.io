@@ -1024,4 +1024,9 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-setTimeout(() => talk('arbero', ['Welcome ! ようこそ！\n（SPACEキーを押してね）', 'WASDで移動、SPACEで調べるよ！'], null, { skippable: true }), 400);
+// 最初の台詞。スマホ（画面の WASD ボタンを出すとき）はタップの説明にする
+const WELCOME = {
+  pc: ['Welcome ! ようこそ！\n（SPACEキーを押してね）', 'WASDで移動、SPACEで調べるよ！\nクリックでも歩けるよ'],
+  touch: ['Welcome ! ようこそ！\n（タップしてね）', 'タップした所まで歩くよ！\nもう一度タップで調べられるよ'],
+};
+setTimeout(() => talk('arbero', WELCOME[document.body.classList.contains('touch') ? 'touch' : 'pc'], null, { skippable: true }), 400);

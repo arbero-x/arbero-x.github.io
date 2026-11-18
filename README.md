@@ -28,7 +28,7 @@ npm run dev
    - `bandcampTrackId`：Bandcamp の Share / Embed で出る埋め込みコードの `track=数字`
    - `youtubeId`：MV の URL の `v=` の後ろ
    - 発売前で Bandcamp / YouTube がまだないときは、`bandcampTrackId` と `youtubeId` を `null` にし、`bandcampUrl` を `https://arbero.bandcamp.com/` にする。試聴と MV の欄に COMING SOON と出る
-3. LIST には自動で載ります。フィールドに CD を置くときは、`src/main.js` の地図（`RAW`）に部屋と番号を、`CD` に表記と色を足す
+3. LIST には自動で載ります。フィールドに CD を置くときは、`src/main.js` の地図（`RAW`）に部屋と番号を、`CD` に表記と色を、`CD_LINE` に調べたあと arbero が言うひとことを足す（CD を調べると頭の上に「！」が出て、曲の説明 → ひとことの順に出る）
 
 ## Discord のダイヤルロック
 

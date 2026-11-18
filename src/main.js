@@ -69,6 +69,8 @@ const CD = {
   2: { i: 1, title: 'Penguin', sub: 'ペンギン', col: '#9fd3ff' },
   3: { i: 2, title: 'ProMotion', sub: 'プロモーション', col: '#3dff5a' },
 };
+// CD を調べて曲の説明を読んだあとに、arbero が言うひとこと
+const CD_LINE = { 1: 'ICOってゲームはおすすめ', 2: 'ペンギンってかわいいよね', 3: 'グラニュラーっておもしろいよね' };
 const INFO = {
   M: { no: 'MAILBOX', title: 'マシュマロ', sub: '匿名でメッセージを送れます', text: '（下のボタンから開く）', links: [L.mm], col: '#f4f4f4' },
   U: { no: 'SPEAKER', title: 'SoundCloud', sub: '', text: '（下のボタンから開く）', links: [L.sc], col: '#f4f4f4' },
@@ -84,8 +86,7 @@ for (const [k, c] of Object.entries(CD)) {
   const links = [];
   if (r.youtubeId) links.push(['YouTube', `https://www.youtube.com/watch?v=${encodeURIComponent(r.youtubeId)}`]);
   links.push(['Bandcamp', r.bandcampUrl]);
-  INFO[k] = { no: `${r.catNo} / ${r.date} RELEASE`, title: c.title, sub: c.sub, text: `${r.blurb}\n（下のボタンからBandcampへ）`, links, col: c.col };
-  OBJ_URL[k] = r.bandcampUrl;
+  INFO[k] = { no: `${r.catNo} / ${r.date} RELEASE`, title: c.title, sub: c.sub, text: `${r.blurb}\n（下のボタンから${links.map(l => l[0]).join('・')}へ）`, links, col: c.col, line: CD_LINE[k] };
 }
 const LABEL = { T: 'TERMINAL', V: '???', M: 'MARSHMALLOW', U: 'SOUNDCLOUD', N: 'NOTE', D: 'DISCORD', C: 'TWITCASTING', Y: 'YOUTUBE' };
 const TV_SCRIPT = ['よく見つけたね！', 'わざわざ見に来てくれてありがとね！', '（実はセリフはこれで終わりです）'];
@@ -432,7 +433,7 @@ let skipOnMove = false; // 最初の会話だけ、移動キーで閉じてそ�
 function startType(txt) { full = txt; typed = 0; tAcc = 0; dText.textContent = ''; }
 function openDlg(k) {
   const d = INFO[k];
-  open = true; mode = 'info'; q = []; loopQ = null; skipOnMove = false;
+  open = true; mode = 'info'; q = d.line ? [d.line] : []; qi = -1; loopQ = null; skipOnMove = false;
   elN.textContent = d.no; elT.style.display = ''; elS.style.display = '';
   elT.textContent = d.title; elT.style.color = d.col; elS.textContent = d.sub;
   startType(d.text);
@@ -455,6 +456,11 @@ function talk(name, lines, loop, { skippable = false } = {}) {
 }
 function advance() {
   if (typed < full.length) { typed = full.length; dText.textContent = full; return; }
+  if (mode === 'info' && qi < q.length - 1) {
+    // 曲の説明のあとに arbero のひとこと。リンクのボタンは出したままにする
+    qi++; elN.textContent = 'arbero'; elT.style.display = 'none'; elS.style.display = 'none';
+    startType(q[qi]); return;
+  }
   if (mode === 'talk') {
     if (qi < q.length - 1) { qi++; startType(q[qi]); return; }
     if (loopQ) {
@@ -469,13 +475,16 @@ function closeDlg() { open = false; dlg.style.display = 'none'; }
 $('dlgClose').addEventListener('click', e => { closeDlg(); if (e.detail) e.currentTarget.blur(); });
 
 let near = null;
+let found = null, foundT = 0; // CD を見つけた「！」を出している間（そのあとで説明を開く）
 function action() {
+  if (found) return;
   if (open) { advance(); return; }
   if (!near) {
     if (onSign()) tapSign();
     return;
   }
   const k = near.k;
+  if ('123'.includes(k) && INFO[k]) { found = k; foundT = 0; clearKeys(); return; }
   const url = OBJ_URL[k];
   if (url) {
     const w = window.open(url, '_blank');
@@ -670,7 +679,8 @@ function updateIce(dt, dx, dy, tx, ty) {
 function update(dt) {
   let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
   if (open && skipOnMove && (dx || dy) && !overlayOpen()) closeDlg(); // 移動キー（画面の WASD ボタンも）で最初の会話を飛ばす
-  const paused = open || overlayOpen();
+  if (found && (foundT += dt) > 0.55) { const k = found; found = null; openDlg(k); }
+  const paused = open || !!found || overlayOpen();
   if (paused) dx = dy = 0;
   const tx = Math.floor(P.x / T), ty = Math.floor((P.y - 2) / T);
   if (slide || at(tx, ty) === ICE) { if (!paused) updateIce(dt, dx, dy, tx, ty); dx = dy = 0; P.moving = false; }
@@ -854,6 +864,13 @@ function bubble(o, sx, sy) {
   ctx.fillText(label, bx + 13, by + 10);
   ctx.fillStyle = '#f4f4f4'; ctx.fillRect(Math.round(sx) - 1, by + 12, 3, 2);
 }
+// 頭の上の「！」。最初の一瞬だけ少し上に跳ねて、ポンと出たように見せる
+function drawFound(sx, top) {
+  const by = top - 11 - (foundT < 0.08 ? 2 : foundT < 0.14 ? 1 : 0), bx = sx - 4;
+  ctx.fillStyle = '#000'; ctx.fillRect(bx - 1, by - 1, 11, 12); ctx.fillRect(sx - 2, by + 11, 3, 2);
+  ctx.fillStyle = '#f4f4f4'; ctx.fillRect(bx, by, 9, 10); ctx.fillRect(sx - 1, by + 10, 1, 2);
+  ctx.fillStyle = '#e8202a'; ctx.fillRect(sx - 1, by + 2, 3, 4); ctx.fillRect(sx - 1, by + 7, 3, 2);
+}
 function draw(t) {
   const th = TH[zone];
   ctx = floorL.g;
@@ -887,11 +904,12 @@ function draw(t) {
         const fr = P.moving ? 1 + (((P.anim * 7) | 0) % 2) : 0, img = SPR[P.dir][fr], bobY = P.moving && fr === 1 ? -1 : 0;
         if (P.dir === 'side' && P.flip) { ctx.save(); ctx.translate(sx, 0); ctx.scale(-1, 1); ctx.drawImage(img, -SPR_W / 2, sy - SPR_H + 1 + bobY); ctx.restore(); }
         else ctx.drawImage(img, sx - SPR_W / 2, sy - SPR_H + 1 + bobY);
+        if (found) drawFound(sx, sy - SPR_H - 1);
       },
     },
   ];
   ds.sort((a, b) => a.y - b.y).forEach(d => d.f());
-  if (near && !open) bubble(near, near.x - cx, near.y - cy);
+  if (near && !open && !found) bubble(near, near.x - cx, near.y - cy);
   // 重ねる：床 → タギング → 物と人
   out.imageSmoothingEnabled = false;
   out.drawImage(floorL.c, 0, 0, cv.width, cv.height);

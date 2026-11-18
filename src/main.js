@@ -474,6 +474,11 @@ function advance() {
 }
 function closeDlg() { open = false; dlg.style.display = 'none'; }
 $('dlgClose').addEventListener('click', e => { closeDlg(); if (e.detail) e.currentTarget.blur(); });
+// ウィンドウの × とリンク以外をクリック / タップしても、SPACE と同じく次の台詞へ
+dlg.addEventListener('click', e => {
+  if (e.target.closest('a, button')) return;
+  if (open && !found) advance();
+});
 
 let near = null;
 let found = null, foundT = 0; // CD を見つけた「！」を出している間（そのあとで説明を開く）

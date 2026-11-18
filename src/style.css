@@ -38,6 +38,7 @@ button { font: inherit; }
 #hint { position: fixed; left: 50%; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); font-size: 12px; color: #9a9a9a; white-space: nowrap; z-index: 2; }
 
 #dlg {
+  cursor: pointer;
   position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); width: min(560px, calc(100vw - 24px)); box-sizing: border-box;
   background: #000; border: 3px solid var(--g); box-shadow: 0 0 0 3px #000, 0 0 0 5px var(--w); padding: 14px 16px 16px; display: none; z-index: 4;
 }

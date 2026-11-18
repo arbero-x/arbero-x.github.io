@@ -88,9 +88,10 @@ for (const [k, c] of Object.entries(CD)) {
   links.push(['Bandcamp', r.bandcampUrl]);
   INFO[k] = { no: `${r.catNo} / ${r.date} RELEASE`, title: c.title, sub: c.sub, text: `${r.blurb}\n（下のボタンから${links.map(l => l[0]).join('・')}へ）`, links, col: c.col, line: CD_LINE[k] };
 }
-const LABEL = { T: 'TERMINAL', V: '???', M: 'MARSHMALLOW', U: 'SOUNDCLOUD', N: 'NOTE', D: 'DISCORD', C: 'TWITCASTING', Y: 'YOUTUBE' };
+const LABEL = { T: 'TERMINAL', V: '???', M: 'MARSHMALLOW', U: 'SOUNDCLOUD', N: 'NOTE', D: 'DISCORD', C: 'TWITCASTING', Y: 'YOUTUBE', G: 'PENGUIN' };
 const TV_SCRIPT = ['よく見つけたね！', 'わざわざ見に来てくれてありがとね！', '（実はセリフはこれで終わりです）'];
 const TV_LOOP = ['・・・', '暇なんですか？'];
+const PENGUIN_LINES = ['ここの床、すべるよ', '止まりたいときは、なにかにぶつかればいいんだ', 'ぼくとかね'];
 let tvOn = false, tvSeen = false;
 
 // スタート部屋の床のタギング（サイン）。3 回続けて押すと隠し要素が出る。ここだけ画面の解像度で描く
@@ -492,6 +493,7 @@ function action() {
     return;
   }
   if (k === 'D') { openDialLock(null); return; }
+  if (k === 'G') { talk('PENGUIN', PENGUIN_LINES); return; }
   if (k === 'V') {
     tvOn = true;
     if (!tvSeen) { tvSeen = true; talk('BROKEN TV', TV_SCRIPT, TV_LOOP); } else talk('BROKEN TV', [], TV_LOOP);
@@ -699,7 +701,7 @@ function update(dt) {
   for (let i = 0; i < 3; i++) bgc[i] += (tb[i] - bgc[i]) * k;
   near = null;
   let best = 22;
-  for (const o of objs) { if (o.k === 'G') continue; const d = Math.hypot(o.x - P.x, o.y - P.y); if (d < best) { best = d; near = o; } }
+  if (!slide) for (const o of objs) { const d = Math.hypot(o.x - P.x, o.y - P.y); if (d < best) { best = d; near = o; } }
   if (open && typed < full.length) {
     tAcc += dt;
     while (tAcc > 0.03 && typed < full.length) { tAcc -= 0.03; typed++; }

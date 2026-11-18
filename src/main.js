@@ -529,7 +529,11 @@ cv.addEventListener('click', e => {
   if (inSign(wx, wy, 2)) { tapSign(); return; }
   if (found || overlayOpen()) return;
   const o = objAt(wx, wy);
-  if (o) { if (near === o) { auto = null; action(); } else goTo(o, null); return; }
+  if (o) {
+    // すぐそばの物なら、そちらを向いて調べる。遠ければ歩いていく
+    if (Math.hypot(o.x - P.x, o.y - P.y) < 22 && !slide) { auto = null; faceTo(o); near = o; action(); } else goTo(o, null);
+    return;
+  }
   const gx = Math.floor(wx / T), gy = Math.floor(wy / T);
   if (!solidCh(at(gx, gy))) goTo(null, [gx, gy]);
 });
@@ -728,10 +732,7 @@ function autoInput(tx, ty, dt) {
   for (;;) {
     const st = auto.path[auto.i];
     if (!st) {
-      if (auto.o) { // 着いたら物のほうを向く
-        const ddx = auto.o.x - P.x, ddy = auto.o.y - P.y;
-        if (Math.abs(ddx) > Math.abs(ddy)) { P.dir = 'side'; P.flip = ddx < 0; } else P.dir = ddy < 0 ? 'up' : 'down';
-      }
+      if (auto.o) faceTo(auto.o); // 着いたら物のほうを向く
       auto = null; return [0, 0];
     }
     if ((auto.t += dt) > 4) { auto = null; return [0, 0]; } // 引っかかったらやめる
@@ -748,6 +749,10 @@ function autoInput(tx, ty, dt) {
     const [vx, vy] = st.via;
     return [vx * T + 8 - P.x, vy * T + 12 - P.y];
   }
+}
+function faceTo(o) {
+  const ddx = o.x - P.x, ddy = o.y - P.y;
+  if (Math.abs(ddx) > Math.abs(ddy)) { P.dir = 'side'; P.flip = ddx < 0; } else P.dir = ddy < 0 ? 'up' : 'down';
 }
 // クリックした位置にある物（絵は上に伸びているので、マスより少し上まで当たりにする）
 function objAt(wx, wy) {
@@ -796,8 +801,17 @@ function update(dt) {
   const tb = TH[zone].bg, k = Math.min(1, dt * 3);
   for (let i = 0; i < 3; i++) bgc[i] += (tb[i] - bgc[i]) * k;
   near = null;
-  let best = 22;
-  if (!slide) for (const o of objs) { const d = Math.hypot(o.x - P.x, o.y - P.y); if (d < best) { best = d; near = o; } }
+  // 調べる物：手の届く物のうち、向いている方にある物を先に。なければいちばん近い物
+  if (!slide) {
+    const fx = P.dir === 'side' ? (P.flip ? -1 : 1) : 0, fy = P.dir === 'up' ? -1 : P.dir === 'down' ? 1 : 0;
+    let best = Infinity;
+    for (const o of objs) {
+      const ox = o.x - P.x, oy = o.y - P.y, d = Math.hypot(ox, oy);
+      if (d >= 22) continue;
+      const score = d - (d && (ox * fx + oy * fy) / d > 0.7 ? 100 : 0);
+      if (score < best) { best = score; near = o; }
+    }
+  }
   if (open && typed < full.length) {
     tAcc += dt;
     while (tAcc > 0.03 && typed < full.length) { tAcc -= 0.03; typed++; }

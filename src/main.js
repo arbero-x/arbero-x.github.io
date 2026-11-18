@@ -521,7 +521,18 @@ cv.addEventListener('click', e => {
   if (open) return;
   const r = cv.getBoundingClientRect();
   const wx = (e.clientX - r.left) * (VW / r.width) + camX, wy = (e.clientY - r.top) * (VH / r.height) + camY;
-  if (inSign(wx, wy, 2)) tapSign();
+  if (inSign(wx, wy, 2)) { tapSign(); return; }
+  if (found || overlayOpen()) return;
+  const o = objAt(wx, wy);
+  if (o) { if (near === o) { auto = null; action(); } else goTo(o, null); return; }
+  const gx = Math.floor(wx / T), gy = Math.floor(wy / T);
+  if (!solidCh(at(gx, gy))) goTo(null, [gx, gy]);
+});
+// マウスを物に重ねたら指のカーソルにする
+cv.addEventListener('mousemove', e => {
+  const r = cv.getBoundingClientRect();
+  const wx = (e.clientX - r.left) * (VW / r.width) + camX, wy = (e.clientY - r.top) * (VH / r.height) + camY;
+  cv.style.cursor = objAt(wx, wy) || inSign(wx, wy, 2) ? 'pointer' : '';
 });
 
 // ---------- Discord：ダイヤルロックで番号が合ったら招待リンクを出す ----------
@@ -665,6 +676,84 @@ function slideStop(tx, ty, sx, sy) {
   return [x, y];
 }
 let slide = null; // 滑っている間の行き先（マスの中心）
+
+// ---------- クリック / タップした所へ歩く。氷の上は滑って止まるマスも考えて道を探す ----------
+let auto = null; // { path: [{ d, via, to }], i, o, t }
+const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+// (x, y) で (sx, sy) の向きに押し続けたときに止まるマス。進めなければ null
+function stepFrom(x, y, sx, sy) {
+  if (at(x, y) === ICE) { const [gx, gy] = slideStop(x, y, sx, sy); return gx === x && gy === y ? null : [gx, gy]; }
+  const nx = x + sx, ny = y + sy;
+  if (solidCh(at(nx, ny))) return null;
+  return at(nx, ny) === ICE ? slideStop(nx, ny, sx, sy) : [nx, ny];
+}
+// near を渡すと、goals に行けないときは near にいちばん近い止まれるマスまで行く
+function findPath(x0, y0, goals, near) {
+  const key = (x, y) => x + ',' + y, prev = new Map([[key(x0, y0), null]]), qq = [[x0, y0]];
+  const pathTo = k => { const path = []; for (; prev.get(k); k = prev.get(k).from) path.unshift(prev.get(k).step); return path; };
+  let alt = null, altD = Infinity;
+  for (let h = 0; h < qq.length; h++) {
+    const [x, y] = qq[h];
+    if (goals.has(key(x, y))) return pathTo(key(x, y));
+    if (near) { const d = Math.abs(x - near[0]) + Math.abs(y - near[1]); if (d < altD) { altD = d; alt = key(x, y); } }
+    for (const [sx, sy] of DIRS) {
+      const to = stepFrom(x, y, sx, sy);
+      if (!to || prev.has(key(...to))) continue;
+      prev.set(key(...to), { from: key(x, y), step: { d: [sx, sy], via: [x + sx, y + sy], to } });
+      qq.push(to);
+    }
+  }
+  return alt ? pathTo(alt) : null;
+}
+// 物をクリックしたら、その上下左右のマスへ。床なら、そのマスへ
+function goTo(o, tile) {
+  if (slide || open) return;
+  const goals = new Set();
+  if (o) {
+    const ox = Math.floor(o.x / T), oy = Math.floor(o.y / T);
+    for (const [sx, sy] of DIRS) if (!solidCh(at(ox + sx, oy + sy))) goals.add(ox + sx + ',' + (oy + sy));
+  } else goals.add(tile.join(','));
+  const path = findPath(Math.floor(P.x / T), Math.floor((P.y - 2) / T), goals, tile);
+  if (!path) return;
+  clearKeys();
+  auto = { path, i: 0, o, t: 0 };
+}
+// 歩いているあいだ、キーの代わりに押す向き
+function autoInput(tx, ty, dt) {
+  for (;;) {
+    const st = auto.path[auto.i];
+    if (!st) {
+      if (auto.o) { // 着いたら物のほうを向く
+        const ddx = auto.o.x - P.x, ddy = auto.o.y - P.y;
+        if (Math.abs(ddx) > Math.abs(ddy)) { P.dir = 'side'; P.flip = ddx < 0; } else P.dir = ddy < 0 ? 'up' : 'down';
+      }
+      auto = null; return [0, 0];
+    }
+    if ((auto.t += dt) > 4) { auto = null; return [0, 0]; } // 引っかかったらやめる
+    if (slide) return [0, 0];
+    if (tx === st.to[0] && ty === st.to[1]) {
+      if (at(tx, ty) !== ICE) { // 床の上ではマスのまんなかまで寄せてから次へ
+        const ddx = tx * T + 8 - P.x, ddy = ty * T + 12 - P.y;
+        if (Math.hypot(ddx, ddy) > 1) return [ddx, ddy];
+        P.x = tx * T + 8; P.y = ty * T + 12;
+      }
+      auto.i++; auto.t = 0; dt = 0; continue;
+    }
+    if (at(tx, ty) === ICE) return st.d; // 氷の上はまっすぐ押す
+    const [vx, vy] = st.via;
+    return [vx * T + 8 - P.x, vy * T + 12 - P.y];
+  }
+}
+// クリックした位置にある物（絵は上に伸びているので、マスより少し上まで当たりにする）
+function objAt(wx, wy) {
+  let hit = null, best = Infinity;
+  for (const o of objs) {
+    if (Math.abs(wx - o.x) > 9 || wy < o.y - 28 || wy > o.y + 6) continue;
+    const d = Math.hypot(wx - o.x, wy - o.y + 8);
+    if (d < best) { best = d; hit = o; }
+  }
+  return hit;
+}
 function updateIce(dt, dx, dy, tx, ty) {
   if (!slide && (dx || dy)) {
     const sx = dx ? Math.sign(dx) : 0, sy = dx ? 0 : Math.sign(dy);
@@ -680,11 +769,13 @@ function updateIce(dt, dx, dy, tx, ty) {
 }
 function update(dt) {
   let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+  if (dx || dy) auto = null; // キーを押したら、クリックで歩くのをやめる
   if (open && skipOnMove && (dx || dy) && !overlayOpen()) closeDlg(); // 移動キー（画面の WASD ボタンも）で最初の会話を飛ばす
   if (found && (foundT += dt) > 0.55) { const k = found; found = null; openDlg(k); }
   const paused = open || !!found || overlayOpen();
   if (paused) dx = dy = 0;
   const tx = Math.floor(P.x / T), ty = Math.floor((P.y - 2) / T);
+  if (auto && !paused) [dx, dy] = autoInput(tx, ty, dt);
   if (slide || at(tx, ty) === ICE) { if (!paused) updateIce(dt, dx, dy, tx, ty); dx = dy = 0; P.moving = false; }
   else P.moving = !!(dx || dy);
   if (P.moving) {
